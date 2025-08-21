@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+
 export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({
@@ -9,15 +10,10 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "Donor", // ✅ default role
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleRoleChange = (role: string) => {
-    setForm({ ...form, role });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,7 +26,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50">
       <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 relative">
         {/* Close Button */}
         <button
@@ -47,7 +43,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Signup lang makita */}
+          {/* Signup only */}
           {!isLogin && (
             <div>
               <label className="block text-gray-700">Full Name</label>
@@ -98,29 +94,6 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
                 required
                 className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300"
               />
-            </div>
-          )}
-
-          {/* Role selection (Signup only) */}
-          {!isLogin && (
-            <div>
-              <label className="block text-gray-700 mb-1">Choose Account Type</label>
-              <div className="flex justify-between border rounded-lg  overflow-hidden">
-                {["Donor", "Blood Bank", "Hospital"].map((role) => (
-                  <button
-                    key={role}
-                    type="button"
-                    onClick={() => handleRoleChange(role)}
-                    className={`flex-1 py-2 text-center ${
-                      form.role === role
-                        ? "bg-red-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {role}
-                  </button>
-                ))}
-              </div>
             </div>
           )}
 
