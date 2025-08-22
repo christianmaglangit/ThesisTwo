@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 
+interface AuthModalProps {
+  mode: "login" | "signup";
+  onClose: () => void;
+  onLogin: (user: any) => void;
+}
 
-export default function AuthModal({ onClose }: { onClose: () => void }) {
-  const [isLogin, setIsLogin] = useState(true);
+export default function AuthModal({ mode, onClose, onLogin }: AuthModalProps) {
+  const [isLogin, setIsLogin] = useState(mode === "login");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -18,32 +23,73 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLogin && form.password !== form.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
+
+    if (isLogin) {
+      // LOGIN
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const foundUser = users.find(
+        (u: any) => u.email === form.email && u.password === form.password
+      );
+
+      if (foundUser) {
+        localStorage.setItem("currentUser", JSON.stringify(foundUser));
+        alert("Login successful!");
+        onLogin(foundUser);
+        onClose();
+      } else {
+        alert("Invalid email or password.");
+      }
+    } else {
+      // SIGNUP
+      if (form.password !== form.confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const exists = users.some((u: any) => u.email === form.email);
+      if (exists) {
+        alert("Email already registered!");
+        return;
+      }
+
+      const newUser = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      };
+
+      users.push(newUser);
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("currentUser", JSON.stringify(newUser));
+      alert("Account created successfully!");
+      onLogin(newUser);
+      onClose();
     }
-    console.log(isLogin ? "Login form:" : "Signup form:", form);
   };
 
   return (
-    <div className="fixed inset-0 backdrop-blur flex items-center justify-center z-50">
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 relative">
-        {/* Close Button */}
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
-          onClick={onClose}
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl"
         >
           ✕
         </button>
 
-        {/* Title */}
         <h2 className="text-2xl font-bold text-center text-red-600 mb-6">
           {isLogin ? "Login" : "Create an Account"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Signup only */}
           {!isLogin && (
             <div>
               <label className="block text-gray-700">Full Name</label>
@@ -53,7 +99,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
                 value={form.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300"
+                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300 text-gray-900"
               />
             </div>
           )}
@@ -66,7 +112,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
               value={form.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300"
+              className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300 text-gray-900"
             />
           </div>
 
@@ -78,11 +124,10 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
               value={form.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300"
+              className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300 text-gray-900"
             />
           </div>
 
-          {/* Confirm Password (Signup only) */}
           {!isLogin && (
             <div>
               <label className="block text-gray-700">Confirm Password</label>
@@ -92,7 +137,7 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300"
+                className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-red-300 text-gray-900"
               />
             </div>
           )}
@@ -105,7 +150,6 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
           </button>
         </form>
 
-        {/* Switch Auth */}
         <p className="text-center text-sm text-gray-600 mt-4">
           {isLogin ? (
             <>
