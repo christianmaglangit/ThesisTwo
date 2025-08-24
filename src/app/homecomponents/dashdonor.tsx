@@ -1,20 +1,31 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import Image from "next/image";
 
-export default function Dashboard() {
+export default function Dashdonor() {
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const progressValue = 175;
   const daysLeft = 45;
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  useEffect(() => {
+    const user = localStorage.getItem("currentUser");
+    if (user) setCurrentUser(JSON.parse(user));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white p-10 relative">
       <div className="grid md:grid-cols-2 gap-8 items-center border-2 p-10 rounded-xl">
         <div>
-          <h1 className="text-5xl font-bold mb-2">Hello, JC.</h1>
-          <h2 className="text-5xl font-bold text-red-500 mb-4">You're a hero!</h2>
+          <h1 className="text-5xl font-bold mb-2">
+            Hello, {currentUser?.name || "Donor"}.
+          </h1>
+          <h2 className="text-5xl font-bold text-red-500 mb-4">
+            You're a hero!
+          </h2>
           <p className="text-lg mb-8">You've saved 4 lives</p>
         </div>
 
@@ -47,7 +58,7 @@ export default function Dashboard() {
       {/* BLOOD JOURNEY TRACKER */}
       <div className="bg-gray-800 rounded-xl p-4 mt-12">
         <h3 className="text-lg font-semibold mb-2">Track My Blood Journey</h3>
-        <p className="text-sm text-gray-400 mb-4">Jane</p>
+        <p className="text-sm text-gray-400">{currentUser?.name || "Jane"}</p>
         <div className="flex justify-between text-sm text-gray-300">
           <span>Donated</span>
           <span>Processed</span>
