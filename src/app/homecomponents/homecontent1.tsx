@@ -30,7 +30,7 @@ export default function HomeContent1() {
     return () => clearInterval(interval);
   }, [slides.length]);
   return (
-    <div className="relative w-full h-96 flex items-center justify-center text-center text-white mt-20 overflow-hidden">
+    <div className="relative w-full h-96 flex items-center justify-center text-center text-white mt-15 overflow-hidden">
       <div className="absolute inset-0">
         <Image
           src={slides[currentIndex].image}
