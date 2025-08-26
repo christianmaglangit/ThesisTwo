@@ -149,7 +149,7 @@ export default function DashHospital() {
       {/* Header with Notification and Logout */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl md:text-5xl font-bold text-red-600 mb-2">🏥 Hospital Dashboard</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-red-600 mb-2">Hospital Dashboard</h1>
           <p className="text-gray-300">Track blood supply, confirm deliveries/pickups, and report issues.</p>
         </div>
         <div className="flex items-center gap-4">

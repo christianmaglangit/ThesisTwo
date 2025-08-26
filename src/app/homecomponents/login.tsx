@@ -65,7 +65,7 @@ export default function LoginModal({ onClose, onLogin, onSwitchToSignup }: Login
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
       <div className="relative bg-white rounded-xl shadow-xl p-8 w-full max-w-md">
         {/* Close Button */}
         <button

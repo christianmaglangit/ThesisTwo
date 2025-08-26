@@ -11,7 +11,7 @@ export default function BloodbankHeader() {
   ];
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
+    <header className="fixed top-0 left-64 right-0 h-16  bg-white text-red-600 flex items-center justify-end px-6 shadow z-50">
       <div className="relative">
         {/* Notification Bell */}
         <button

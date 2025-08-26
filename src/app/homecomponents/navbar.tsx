@@ -67,10 +67,14 @@ export default function Navbar({ onLogin, onLogout, currentUser }: NavbarProps) 
         <div className="flex items-center justify-between p-4">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <span className="text-3xl font-bold">DUGO</span>
-            <span className="text-sm hidden sm:inline">
-              Donor Utility for Giving and Organizing
-            </span>
+            <div>
+              <div>
+                <span className="text-3xl font-bold">DUGO</span>
+              </div>
+              <div>
+                <span className="text-sm hidden sm:inline">Donor Utility for Giving and Organizing</span>
+              </div>
+            </div>
           </div>
 
           {/* Desktop Menu */}

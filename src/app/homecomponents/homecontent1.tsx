@@ -30,7 +30,7 @@ export default function HomeContent1() {
     return () => clearInterval(interval);
   }, [slides.length]);
   return (
-    <div className="relative w-full h-96 flex items-center justify-center text-center text-white mt-15 overflow-hidden">
+    <div className="relative w-full h-96 flex items-center justify-center text-center text-white mt-20 overflow-hidden">
       <div className="absolute inset-0">
         <Image
           src={slides[currentIndex].image}
@@ -38,7 +38,7 @@ export default function HomeContent1() {
           fill
           className="object-cover transition-all duration-1000 ease-in-out"
         />
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/20"></div>
       </div>
       <div className="relative z-10 max-w-xl">
         <h1 className="text-3xl md:text-4xl font-bold mb-4 text-shadow-lg/50">
