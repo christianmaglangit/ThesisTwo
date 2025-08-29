@@ -28,7 +28,7 @@ interface AppointmentEvent extends Event {
   status: string;
 }
 
-// Generate 25 mock appointments
+// Generate mock data
 const generateMockAppointments = (): AppointmentEvent[] => {
   const donors = [
     "Juan Dela Cruz","Maria Santos","Pedro Reyes","Ana Lim","Carlos Dizon",
@@ -58,36 +58,23 @@ const generateMockAppointments = (): AppointmentEvent[] => {
   });
 };
 
-// Notification Header Component
-function NotificationHeader() {
-  const [notifications] = useState([
-    { id: 1, message: "New appointment added" },
-    { id: 2, message: "Blood request approved" },
-  ]);
-
-  return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
-      <div className="relative">
-        <button
-          onClick={() => window.alert("Go to Notification Logs")}
-          className="text-2xl hover:text-red-500"
-        >
-          🔔
-        </button>
-        {notifications.length > 0 && (
-          <span className="absolute top-0 right-0 bg-red-600 rounded-full text-xs w-5 h-5 flex items-center justify-center">
-            {notifications.length}
-          </span>
-        )}
-      </div>
-    </header>
-  );
-}
-
 export default function BloodBankAppointments() {
   const [events, setEvents] = useState<AppointmentEvent[]>(generateMockAppointments());
   const [view, setView] = useState<View>("week");
   const [date, setDate] = useState<Date>(new Date());
+
+  const [selectedEvent, setSelectedEvent] = useState<AppointmentEvent | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [failMode, setFailMode] = useState(false);
+  const [comment, setComment] = useState("");
+
+  // 🔔 Notifications
+  const [notifications] = useState([
+    { id: 1, message: "New appointment added" },
+    { id: 2, message: "Blood request approved" },
+    { id: 3, message: "Reminder: Appointment tomorrow" },
+  ]);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   // Load from localStorage
   useEffect(() => {
@@ -107,49 +94,82 @@ export default function BloodBankAppointments() {
     localStorage.setItem("appointments_calendar", JSON.stringify(events));
   }, [events]);
 
-  // Navigation
-  const goToToday = () => setDate(new Date());
-  const goToPrev = () => {
-    const newDate = new Date(date);
-    if (view === "month") newDate.setMonth(date.getMonth() - 1);
-    else if (view === "week") newDate.setDate(date.getDate() - 7);
-    else newDate.setDate(date.getDate() - 1);
-    setDate(newDate);
+  // Handle click on event
+  const handleEventClick = (event: AppointmentEvent) => {
+    setSelectedEvent(event);
+    setFailMode(false);
+    setComment("");
+    setShowModal(true);
   };
-  const goToNext = () => {
-    const newDate = new Date(date);
-    if (view === "month") newDate.setMonth(date.getMonth() + 1);
-    else if (view === "week") newDate.setDate(date.getDate() + 7);
-    else newDate.setDate(date.getDate() + 1);
-    setDate(newDate);
+
+  // Remove event (Success or after Fail submit)
+  const removeEvent = (id: number) => {
+    setEvents((prev) => prev.filter((ev) => ev.id !== id));
+    setShowModal(false);
+  };
+
+  // Mark success
+  const markSuccess = () => {
+    if (selectedEvent) {
+      removeEvent(selectedEvent.id);
+    }
+  };
+
+  // Mark fail (show comment box first)
+  const markFail = () => {
+    setFailMode(true);
+  };
+
+  // Submit fail with comment
+  const submitFail = () => {
+    if (selectedEvent) {
+      console.log("Fail reason:", comment); // can save to DB later
+      removeEvent(selectedEvent.id);
+    }
   };
 
   return (
     <div className="flex">
       <BloodbankSidebar />
-      <div className="ml-64 w-full">
-        <NotificationHeader />
+      <div className="ml-64 w-full relative">
+        {/* 🔔 Notification Bell */}
+        <div className="absolute top-4 right-8 z-50">
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="text-2xl hover:text-red-500 relative"
+            >
+              🔔
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-gray-800 rounded-lg shadow-lg text-white z-50">
+                <h3 className="font-semibold text-lg px-4 py-2 border-b border-gray-700">
+                  Notifications
+                </h3>
+                <ul>
+                  {notifications.map((note) => (
+                    <li
+                      key={note.id}
+                      className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                    >
+                      {note.message}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* MAIN CONTENT */}
         <main className="pt-20 p-8 min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
           <h1 className="text-3xl font-bold text-red-500 mb-6">Manage Appointments</h1>
-
-          {/* Navigation Buttons */}
-          <div className="mb-4 flex gap-2 items-center">
-            <button onClick={goToToday} className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">Today</button>
-            <button onClick={goToPrev} className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">Prev</button>
-            <button onClick={goToNext} className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">Next</button>
-            <span className="ml-4 font-semibold">
-              {date.toDateString()}
-            </span>
-            <select
-              value={view}
-              onChange={(e) => setView(e.target.value as View)}
-              className="bg-gray-600 text-white px-2 rounded-lg ml-auto"
-            >
-              <option value="month">Month</option>
-              <option value="week">Week</option>
-              <option value="day">Day</option>
-            </select>
-          </div>
 
           {/* Calendar */}
           <div className="bg-white rounded-2xl shadow-lg p-4 text-black">
@@ -165,10 +185,71 @@ export default function BloodBankAppointments() {
               style={{ height: 600 }}
               step={30}
               timeslots={2}
+              onSelectEvent={(event) => handleEventClick(event as AppointmentEvent)}
             />
           </div>
         </main>
       </div>
+
+      {/* MODAL */}
+      {showModal && selectedEvent && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Appointment with {selectedEvent.donor}
+            </h2>
+            <p className="mb-2">Blood Type: <span className="font-bold">{selectedEvent.type}</span></p>
+            <p className="mb-2">Status: <span className="font-bold">{selectedEvent.status}</span></p>
+
+            {!failMode ? (
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={markSuccess}
+                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold"
+                >
+                  ✅ Success
+                </button>
+                <button
+                  onClick={markFail}
+                  className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold"
+                >
+                  ❌ Fail
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Enter reason for failure..."
+                  className="w-full p-2 rounded-lg text-black"
+                  rows={3}
+                />
+                <div className="flex justify-end gap-3 mt-3">
+                  <button
+                    onClick={() => setFailMode(false)}
+                    className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={submitFail}
+                    className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold"
+                  >
+                    Submit Fail
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

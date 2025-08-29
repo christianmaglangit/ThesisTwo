@@ -8,37 +8,65 @@ interface BloodCampaign {
   id: number;
   title: string;
   date: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   location: string;
 }
 
 // Mock campaigns
 const initialCampaigns: BloodCampaign[] = [
-  { id: 1, title: "Red Cross Donation Drive", date: "2025-09-05", time: "09:00", location: "St. Peter's College Gym" },
-  { id: 2, title: "Community Blood Drive", date: "2025-09-12", time: "10:00", location: "City Health Center" },
-  { id: 3, title: "University Blood Donation Week", date: "2025-09-20", time: "08:30", location: "University Campus Hall" },
+  { id: 1, title: "Red Cross Donation Drive", date: "2025-09-05", startTime: "09:00", endTime: "15:00", location: "St. Peter's College Gym" },
+  { id: 2, title: "Community Blood Drive", date: "2025-09-12", startTime: "10:00", endTime: "14:00", location: "City Health Center" },
+  { id: 3, title: "University Blood Donation Week", date: "2025-09-20", startTime: "08:30", endTime: "17:00", location: "University Campus Hall" },
 ];
 
-// Notification Header Component
+// ✅ Helper function to convert 24h → 12h format
+const formatTime12Hour = (time: string) => {
+  if (!time) return "";
+  const [hourStr, minute] = time.split(":");
+  let hour = parseInt(hourStr, 10);
+  const suffix = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+  return `${hour}:${minute} ${suffix}`;
+};
+
+// ✅ Notification Header Component with dropdown (same as appointment page)
 function NotificationHeader() {
   const [notifications] = useState([
     { id: 1, message: "New campaign added" },
     { id: 2, message: "Blood request approved" },
   ]);
+  const [open, setOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
       <div className="relative">
         <button
-          onClick={() => window.alert("Go to Notification Logs")}
-          className="text-2xl hover:text-red-500"
+          onClick={() => setOpen((prev) => !prev)}
+          className="text-2xl hover:text-red-500 relative"
         >
           🔔
+          {notifications.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-600 rounded-full text-xs w-5 h-5 flex items-center justify-center">
+              {notifications.length}
+            </span>
+          )}
         </button>
-        {notifications.length > 0 && (
-          <span className="absolute top-0 right-0 bg-red-600 rounded-full text-xs w-5 h-5 flex items-center justify-center">
-            {notifications.length}
-          </span>
+
+        {/* Dropdown */}
+        {open && (
+          <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg z-50">
+            <ul className="divide-y divide-gray-700">
+              {notifications.map((n) => (
+                <li key={n.id} className="p-3 hover:bg-gray-700 cursor-pointer">
+                  {n.message}
+                </li>
+              ))}
+              {notifications.length === 0 && (
+                <li className="p-3 text-gray-400 text-center">No new notifications</li>
+              )}
+            </ul>
+          </div>
         )}
       </div>
     </header>
@@ -47,24 +75,32 @@ function NotificationHeader() {
 
 export default function BloodlettingCampaigns() {
   const [campaigns, setCampaigns] = useState<BloodCampaign[]>(initialCampaigns);
+
+  // States for modal add campaign
+  const [showAddModal, setShowAddModal] = useState(false);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
+
+  // Edit modal
   const [editingCampaign, setEditingCampaign] = useState<BloodCampaign | null>(null);
 
   // Add new campaign
   const handleAddCampaign = () => {
-    if (!title || !date || !time || !location) return;
+    if (!title || !date || !startTime || !endTime || !location) return;
     const newCampaign: BloodCampaign = {
       id: Date.now(),
       title,
       date,
-      time,
+      startTime,
+      endTime,
       location,
     };
     setCampaigns((prev) => [...prev, newCampaign]);
-    setTitle(""); setDate(""); setTime(""); setLocation("");
+    setTitle(""); setDate(""); setStartTime(""); setEndTime(""); setLocation("");
+    setShowAddModal(false);
   };
 
   // Delete campaign
@@ -94,53 +130,6 @@ export default function BloodlettingCampaigns() {
         <main className="pt-20 p-8 min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
           <h1 className="text-3xl font-bold text-red-500 mb-6">Bloodletting Campaigns</h1>
 
-          {/* Add new campaign */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 text-black max-w-lg mb-6">
-            <h2 className="text-2xl font-semibold mb-4">Add New Campaign</h2>
-            <div className="mb-3">
-              <label className="block mb-1 font-semibold">Campaign Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="block mb-1 font-semibold">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="block mb-1 font-semibold">Time</label>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="block mb-1 font-semibold">Location</label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-            <button
-              onClick={handleAddCampaign}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold w-full"
-            >
-              Add Campaign
-            </button>
-          </div>
-
           {/* Campaign list */}
           <div className="bg-white rounded-2xl shadow-lg p-6 text-black">
             <h2 className="text-2xl font-semibold mb-4">Upcoming Campaigns</h2>
@@ -149,7 +138,8 @@ export default function BloodlettingCampaigns() {
                 <tr className="bg-gray-200 text-black">
                   <th className="border px-4 py-2">Title</th>
                   <th className="border px-4 py-2">Date</th>
-                  <th className="border px-4 py-2">Time</th>
+                  <th className="border px-4 py-2">Start Time</th>
+                  <th className="border px-4 py-2">End Time</th>
                   <th className="border px-4 py-2">Location</th>
                   <th className="border px-4 py-2">Actions</th>
                 </tr>
@@ -159,7 +149,9 @@ export default function BloodlettingCampaigns() {
                   <tr key={camp.id} className="text-center">
                     <td className="border px-4 py-2">{camp.title}</td>
                     <td className="border px-4 py-2">{camp.date}</td>
-                    <td className="border px-4 py-2">{camp.time}</td>
+                    {/* ✅ Convert times here */}
+                    <td className="border px-4 py-2">{formatTime12Hour(camp.startTime)}</td>
+                    <td className="border px-4 py-2">{formatTime12Hour(camp.endTime)}</td>
                     <td className="border px-4 py-2">{camp.location}</td>
                     <td className="border px-4 py-2 flex justify-center gap-2">
                       <button
@@ -179,7 +171,85 @@ export default function BloodlettingCampaigns() {
                 ))}
               </tbody>
             </table>
+
+            {/* Add Campaign Button */}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold text-white"
+              >
+                + Add New Campaign
+              </button>
+            </div>
           </div>
+
+          {/* Add campaign modal */}
+          {showAddModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-2xl shadow-lg p-6 text-black max-w-lg w-full">
+                <h2 className="text-2xl font-semibold mb-4">Add New Campaign</h2>
+                <div className="mb-3">
+                  <label className="block mb-1 font-semibold">Campaign Title</label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full border px-3 py-2 rounded"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block mb-1 font-semibold">Date</label>
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full border px-3 py-2 rounded"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block mb-1 font-semibold">Start Time</label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full border px-3 py-2 rounded"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block mb-1 font-semibold">End Time</label>
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full border px-3 py-2 rounded"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block mb-1 font-semibold">Location</label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full border px-3 py-2 rounded"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowAddModal(false)}
+                    className="bg-gray-400 hover:bg-gray-500 px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddCampaign}
+                    className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Edit campaign modal */}
           {editingCampaign && (
@@ -209,12 +279,23 @@ export default function BloodlettingCampaigns() {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="block mb-1 font-semibold">Time</label>
+                  <label className="block mb-1 font-semibold">Start Time</label>
                   <input
                     type="time"
-                    value={editingCampaign.time}
+                    value={editingCampaign.startTime}
                     onChange={(e) =>
-                      setEditingCampaign({ ...editingCampaign, time: e.target.value })
+                      setEditingCampaign({ ...editingCampaign, startTime: e.target.value })
+                    }
+                    className="w-full border px-3 py-2 rounded"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block mb-1 font-semibold">End Time</label>
+                  <input
+                    type="time"
+                    value={editingCampaign.endTime}
+                    onChange={(e) =>
+                      setEditingCampaign({ ...editingCampaign, endTime: e.target.value })
                     }
                     className="w-full border px-3 py-2 rounded"
                   />

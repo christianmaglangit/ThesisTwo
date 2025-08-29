@@ -12,26 +12,43 @@ function Card({ children, className }: { children: React.ReactNode; className?: 
   );
 }
 
-// Notification Header Component
+// Notification Header Component (DROPDOWN VERSION)
 function NotificationHeader() {
   const [notifications] = useState([
     { id: 1, message: "New blood request pending" },
     { id: 2, message: "Request approved" },
   ]);
+  const [open, setOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
       <div className="relative">
         <button
-          onClick={() => window.alert("Go to Notification Logs")}
-          className="text-2xl hover:text-red-500"
+          onClick={() => setOpen((prev) => !prev)}
+          className="text-2xl hover:text-red-500 relative"
         >
           🔔
+          {notifications.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-600 rounded-full text-xs w-5 h-5 flex items-center justify-center">
+              {notifications.length}
+            </span>
+          )}
         </button>
-        {notifications.length > 0 && (
-          <span className="absolute top-0 right-0 bg-red-600 rounded-full text-xs w-5 h-5 flex items-center justify-center">
-            {notifications.length}
-          </span>
+
+        {/* Dropdown */}
+        {open && (
+          <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg z-50">
+            <ul className="divide-y divide-gray-700">
+              {notifications.map((n) => (
+                <li key={n.id} className="p-3 hover:bg-gray-700 cursor-pointer">
+                  {n.message}
+                </li>
+              ))}
+              {notifications.length === 0 && (
+                <li className="p-3 text-gray-400 text-center">No new notifications</li>
+              )}
+            </ul>
+          </div>
         )}
       </div>
     </header>
