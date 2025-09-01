@@ -60,7 +60,7 @@ const generateMockAppointments = (): AppointmentEvent[] => {
 
 export default function BloodBankAppointments() {
   const [events, setEvents] = useState<AppointmentEvent[]>(generateMockAppointments());
-  const [view, setView] = useState<View>("week");
+  const [view, setView] = useState<View>("day");
   const [date, setDate] = useState<Date>(new Date());
 
   const [selectedEvent, setSelectedEvent] = useState<AppointmentEvent | null>(null);
@@ -228,7 +228,7 @@ export default function BloodBankAppointments() {
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Enter reason for failure..."
-                  className="w-full p-2 rounded-lg text-black"
+                  className="w-full p-2 rounded-lg text-black bg-gray-400"
                   rows={3}
                 />
                 <div className="flex justify-end gap-3 mt-3">

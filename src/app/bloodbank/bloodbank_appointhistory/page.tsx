@@ -6,10 +6,10 @@ import BloodbankSidebar from "../components/bloodbank_sidebar";
 // Mock data with status + remarks
 const sampleAppointments = [
   { id: "D001", name: "Juan Dela Cruz", day: "2025-08-27", donated: 1, status: "Success" },
-  { id: "D002", name: "Maria Santos", day: "2025-08-27", donated: 2, status: "Failed", remarks: "Low hemoglobin level" },
+  { id: "D002", name: "Maria Santos", day: "2025-08-27", donated: 0, status: "Failed", remarks: "Low hemoglobin level" },
   { id: "D003", name: "Pedro Lopez", day: "2025-08-28", donated: 1, status: "Success" },
   { id: "D004", name: "Ana Reyes", day: "2025-08-29", donated: 3, status: "Success" },
-  { id: "D005", name: "Mark Tan", day: "2025-08-29", donated: 2, status: "Failed", remarks: "High blood pressure" },
+  { id: "D005", name: "Mark Tan", day: "2025-08-29", donated: 0, status: "Failed", remarks: "High blood pressure" },
   { id: "D005", name: "Mark Tan", day: "2025-04-12", donated: 3, status: "Success" },
   { id: "D005", name: "Mark Tan", day: "2025-01-05", donated: 1, status: "Success" },
 ];
@@ -41,9 +41,9 @@ export default function AppointmentHistory() {
       )
     : sampleAppointments.filter((a) => a.day === today);
 
-  // Total donations (count both Success & Failed)
+  // Total donations (only count Success)
   const totalDonations = filteredAppointments.reduce(
-    (sum, a) => sum + a.donated,
+    (sum, a) => (a.status === "Success" ? sum + a.donated : sum),
     0
   );
 
@@ -163,7 +163,8 @@ export default function AppointmentHistory() {
                       <td className="p-3">{a.id}</td>
                       <td className="p-3">{a.name}</td>
                       <td className="p-3">{a.day}</td>
-                      <td className="p-3">{a.donated}</td>
+                      {/* ✅ Blank donated units if Failed */}
+                      <td className="p-3">{a.status === "Failed" ? "" : a.donated}</td>
                       <td className="p-3">
                         {a.status === "Success" ? (
                           <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-200 text-green-800">

@@ -59,7 +59,7 @@ export default function LoginModal({ onClose, onLogin, onSwitchToSignup }: Login
     onClose();
 
     // ✅ Navigate with Next.js router instead of window.location.href
-    if (user.role === "donor") router.push("/donor/donor_dashboard");
+    if (user.role === "donor") router.push("/donor");
     if (user.role === "bloodbank") router.push("/bloodbank/bloodbank_dashboard");
     if (user.role === "hospital") router.push("/hospital/hospital_dashboard");
   };
@@ -87,7 +87,7 @@ export default function LoginModal({ onClose, onLogin, onSwitchToSignup }: Login
             value={form.email}
             onChange={handleChange}
             required
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800 "
           />
 
           <input
@@ -97,7 +97,7 @@ export default function LoginModal({ onClose, onLogin, onSwitchToSignup }: Login
             value={form.password}
             onChange={handleChange}
             required
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800"
           />
 
           <button

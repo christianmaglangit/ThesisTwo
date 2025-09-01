@@ -72,7 +72,7 @@ export default function SignupModal({ onClose, onSwitchToLogin }: SignupModalPro
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800"
           />
 
           <input
@@ -82,7 +82,7 @@ export default function SignupModal({ onClose, onSwitchToLogin }: SignupModalPro
             value={form.email}
             onChange={handleChange}
             required
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800"
           />
 
           <input
@@ -92,7 +92,7 @@ export default function SignupModal({ onClose, onSwitchToLogin }: SignupModalPro
             value={form.password}
             onChange={handleChange}
             required
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800"
           />
 
           <input
@@ -102,7 +102,7 @@ export default function SignupModal({ onClose, onSwitchToLogin }: SignupModalPro
             value={form.confirmPassword}
             onChange={handleChange}
             required
-            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+            className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-800"
           />
 
           <button

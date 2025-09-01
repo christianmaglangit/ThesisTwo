@@ -11,7 +11,6 @@ export default function BloodbankSidebar() {
     { name: "Manage Inventory", href: "/bloodbank/bloodbank_inventory" },
     { name: "Manage Appointments", href: "/bloodbank/bloodbank_appointments" },
     { name: "Appointments History", href: "/bloodbank/bloodbank_appointhistory" },
-    { name: "Manage User Account", href: "/bloodbank/bloodbank_manageuser" },
     { name: "Predictive Reports", href: "/bloodbank/bloodbank_predictivereports" },
     { name: "Blood Requests", href: "/bloodbank/bloodbank_requests" },
     { name: "Generate QR Code", href: "/bloodbank/bloodbank_qrcode" },
