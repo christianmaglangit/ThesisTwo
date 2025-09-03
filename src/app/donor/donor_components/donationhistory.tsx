@@ -37,14 +37,14 @@ export default function DonationHistory({ isOpen, setIsOpen }: any) {
         <h3 className="text-lg font-semibold">Donation History</h3>
         <button
           onClick={() => setIsOpen(true)}
-          className="text-red-500 underline underline-offset-2 decoration-red-500 hover:text-white hover:decoration-white text-sm font-medium"
+          className="text-red-500 underline underline-offset-2 decoration-red-500 hover:text-red-700 hover:decoration-white text-sm font-medium"
         >
           View all
         </button>
       </div>
 
-      {/* Preview list */}
-      <div className="relative h-[230px] overflow-hidden">
+      {/* Preview list - scrollable */}
+      <div className="relative h-[230px] overflow-y-auto pr-1">
         <div className="space-y-4">
           {history.map((item, idx) => (
             <div
@@ -57,7 +57,9 @@ export default function DonationHistory({ isOpen, setIsOpen }: any) {
               </div>
               <span
                 className={`font-semibold ${
-                  item.status === "Success" ? "text-green-500" : "text-red-500 cursor-pointer"
+                  item.status === "Success"
+                    ? "text-green-500"
+                    : "text-red-500 cursor-pointer"
                 }`}
                 onClick={() => {
                   if (item.status === "Fail") setFailComment(item.comment || "No comment");
@@ -74,7 +76,7 @@ export default function DonationHistory({ isOpen, setIsOpen }: any) {
       {isOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl w-[500px] max-h-[80vh] overflow-hidden shadow-lg flex flex-col relative">
-            <div className="flex justify-between items-center p-6 border-b border-gray-700 sticky top-0 bg-white z-10">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
               <h2 className="text-xl font-semibold">All Donation History</h2>
               <button
                 onClick={() => setIsOpen(false)}
@@ -85,7 +87,7 @@ export default function DonationHistory({ isOpen, setIsOpen }: any) {
             </div>
 
             {/* Search + Filter inside modal */}
-            <div className="flex items-center space-x-2 p-4 border-b border-gray-200 sticky top-[72px] bg-white z-10">
+            <div className="flex items-center space-x-2 p-4 border-b border-gray-200 sticky top-[64px] bg-white z-10">
               <input
                 type="text"
                 placeholder="Search by date or location..."
@@ -121,7 +123,8 @@ export default function DonationHistory({ isOpen, setIsOpen }: any) {
               </button>
             </div>
 
-            <div className="p-6 space-y-4 overflow-y-auto">
+            {/* Modal scrollable content */}
+            <div className="p-6 space-y-4 overflow-y-auto flex-1">
               {filteredHistory.map((item, idx) => (
                 <div
                   key={idx}

@@ -6,9 +6,13 @@ export default function RequestBlood() {
   const [formData, setFormData] = useState({
     name: "",
     bloodType: "",
+    bloodBagNeeded: "",
     hospital: "",
     neededDate: "",
-    file: null as File | null,
+    bloodRequestForm: null as File | null,
+    barangayIndigency: null as File | null,
+    seniorId: null as File | null,
+    mayorReferral: null as File | null,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -17,8 +21,9 @@ export default function RequestBlood() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name } = e.target;
     if (e.target.files) {
-      setFormData((prev) => ({ ...prev, file: e.target.files![0] }));
+      setFormData((prev) => ({ ...prev, [name]: e.target.files![0] }));
     }
   };
 
@@ -26,40 +31,53 @@ export default function RequestBlood() {
     e.preventDefault();
     console.log("Form Data:", formData);
     alert("Blood request submitted!");
-    // Here you can later send it to your API
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-20 p-6 bg-white rounded-xl shadow-md">
-      <h1 className="text-2xl font-bold mb-4 text-red-600">Request Blood</h1>
+    <div className="max-w-xl mx-auto mt-5 p-6 bg-gray-100 rounded-xl shadow-md">
+      <h1 className="text-2xl font-bold text-red-600 mb-4">Request Blood</h1>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="text"
           name="name"
-          placeholder="Your Name"
+          placeholder="Patient Name"
           value={formData.name}
           onChange={handleChange}
           className="border p-2 rounded"
           required
         />
 
-        <select
-          name="bloodType"
-          value={formData.bloodType}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        >
-          <option value="">Select Blood Type</option>
-          <option value="A+">A+</option>
-          <option value="A-">A-</option>
-          <option value="B+">B+</option>
-          <option value="B-">B-</option>
-          <option value="AB+">AB+</option>
-          <option value="AB-">AB-</option>
-          <option value="O+">O+</option>
-          <option value="O-">O-</option>
-        </select>
+        <div className="flex gap-3">
+          <select
+            name="bloodType"
+            value={formData.bloodType}
+            onChange={handleChange}
+            className="border p-2 rounded flex-1"
+            required
+          >
+            <option value="">Select Blood Type</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+
+          <input
+            type="number"
+            name="bloodBagNeeded"
+            min={1}
+            value={formData.bloodBagNeeded}
+            onChange={handleChange}
+            className="border p-2 rounded flex-1"
+            placeholder="Blood Bag Needed"
+            required
+          />
+        </div>
 
         <input
           type="text"
@@ -71,25 +89,52 @@ export default function RequestBlood() {
           required
         />
 
-        <input
-          type="date"
-          name="neededDate"
-          value={formData.neededDate}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        />
-
-        <input
-          type="file"
-          name="file"
-          onChange={handleFileChange}
-          className="border p-2 rounded"
-        />
+        {/* File Inputs Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Blood Request Form</label>
+            <input
+              type="file"
+              name="bloodRequestForm"
+              onChange={handleFileChange}
+              className="border p-2 rounded w-full"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Barangay Indigency</label>
+            <input
+              type="file"
+              name="barangayIndigency"
+              onChange={handleFileChange}
+              className="border p-2 rounded w-full"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Senior ID (Optional)</label>
+            <input
+              type="file"
+              name="seniorId"
+              onChange={handleFileChange}
+              className="border p-2 rounded w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Mayor&apos;s Referral Note</label>
+            <input
+              type="file"
+              name="mayorReferral"
+              onChange={handleFileChange}
+              className="border p-2 rounded w-full"
+              required
+            />
+          </div>
+        </div>
 
         <button
           type="submit"
-          className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition"
+          className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition mt-2"
         >
           Submit Request
         </button>

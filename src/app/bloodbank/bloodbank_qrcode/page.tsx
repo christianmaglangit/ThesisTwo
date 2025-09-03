@@ -2,12 +2,13 @@
 
 import { useState, useRef } from "react";
 import BloodbankSidebar from "../components/bloodbank_sidebar";
+import BloodbankHeader from "../components/bloodbankheader";
 import { QRCodeCanvas } from "qrcode.react";
 
 // Simple Card Component
 function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl shadow-lg p-6 bg-gray-800 text-white ${className || ""}`}>
+    <div className={`rounded-2xl shadow-lg p-6 bg-white text-black ${className || ""}`}>
       {children}
     </div>
   );
@@ -24,7 +25,7 @@ function NotificationHeader() {
   ];
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-md text-white flex items-center justify-end px-6">
       <div className="relative">
         {/* Bell */}
         <button
@@ -105,10 +106,11 @@ export default function GenerateQRCode() {
     <div className="flex">
       <BloodbankSidebar />
       <div className="ml-64 w-full">
+        <BloodbankHeader />
         {/* ✅ Updated Notification Bell */}
         <NotificationHeader />
 
-        <main className="pt-20 p-8 min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+        <main className="pt-20 p-8 min-h-screen bg-gray-200">
           <h1 className="text-3xl font-bold text-red-500 mb-6">Generate Donor QR Code</h1>
 
           <Card className="max-w-lg mx-auto">
@@ -144,7 +146,7 @@ export default function GenerateQRCode() {
 
             <button
               onClick={handleGenerate}
-              className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold w-full"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold w-full"
             >
               Generate QR Code
             </button>
@@ -152,7 +154,7 @@ export default function GenerateQRCode() {
 
           {/* ✅ Modal for QR Code */}
           {showModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+            <div className="fixed inset-0 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-50">
               <div className="bg-white rounded-2xl shadow-lg p-6 text-black max-w-md w-full relative">
                 <button
                   onClick={() => setShowModal(false)}
@@ -169,7 +171,7 @@ export default function GenerateQRCode() {
                 <div className="mt-4 flex justify-center">
                   <button
                     onClick={handlePrint}
-                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white font-semibold"
+                    className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white font-semibold"
                   >
                     Print QR Code
                   </button>

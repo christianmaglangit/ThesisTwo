@@ -7,6 +7,7 @@ import HeroSection from "./donor_components/herosection";
 import BloodJourney from "./donor_components/bloodjourney";
 import DonationHistory from "./donor_components/donationhistory";
 import UpcomingCampaigns from "./donor_components/upcomingcampaigns";
+import BloodAvailable from "./donor_components/bloodavailable"; // <-- import the new component
 import Chatbot from "./donor_components/chatbot";
 import RequestModal from "./donor_components/requestblood"; // modal component
 
@@ -51,6 +52,9 @@ export default function DashdonorPage() {
         <UpcomingCampaigns />
       </div>
 
+      {/* Blood Available Section */}
+      <BloodAvailable />
+
       {/* Chat Toggle */}
       <button
         onClick={() => setIsChatOpen((prev) => !prev)}
@@ -64,7 +68,7 @@ export default function DashdonorPage() {
 
       {/* Request Modal */}
       {isRequestModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg max-w-lg w-full p-6 relative">
             <button
               onClick={() => setIsRequestModalOpen(false)}

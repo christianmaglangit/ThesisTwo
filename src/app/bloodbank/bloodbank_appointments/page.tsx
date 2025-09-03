@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import BloodbankSidebar from "../components/bloodbank_sidebar";
+import BloodbankHeader from "../components/bloodbankheader";
 import { Calendar, dateFnsLocalizer, Event, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import enUS from "date-fns/locale/en-US";
@@ -131,45 +132,11 @@ export default function BloodBankAppointments() {
   return (
     <div className="flex">
       <BloodbankSidebar />
-      <div className="ml-64 w-full relative">
-        {/* 🔔 Notification Bell */}
-        <div className="absolute top-4 right-8 z-50">
-          <div className="relative">
-            <button
-              onClick={() => setNotifOpen(!notifOpen)}
-              className="text-2xl hover:text-red-500 relative"
-            >
-              🔔
-              {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                  {notifications.length}
-                </span>
-              )}
-            </button>
-
-            {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-gray-800 rounded-lg shadow-lg text-white z-50">
-                <h3 className="font-semibold text-lg px-4 py-2 border-b border-gray-700">
-                  Notifications
-                </h3>
-                <ul>
-                  {notifications.map((note) => (
-                    <li
-                      key={note.id}
-                      className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
-                    >
-                      {note.message}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-
+      <div className="ml-64 w-full">
+        <BloodbankHeader />
         {/* MAIN CONTENT */}
-        <main className="pt-20 p-8 min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
-          <h1 className="text-3xl font-bold text-red-500 mb-6">Manage Appointments</h1>
+        <main className="pt-20 p-8 min-h-screen bg-gradient-to-br bg-gray-200 text-white">
+          <h1 className="text-3xl font-bold text-red-600 mb-6">Manage Appointments</h1>
 
           {/* Calendar */}
           <div className="bg-white rounded-2xl shadow-lg p-4 text-black">
@@ -198,26 +165,26 @@ export default function BloodBankAppointments() {
             <h2 className="text-xl font-semibold text-white mb-4">
               Appointment with {selectedEvent.donor}
             </h2>
-            <p className="mb-2">Blood Type: <span className="font-bold">{selectedEvent.type}</span></p>
-            <p className="mb-2">Status: <span className="font-bold">{selectedEvent.status}</span></p>
+            <p className="mb-2 text-gray-300">Blood Type: <span className="font-bold">{selectedEvent.type}</span></p>
+            <p className="mb-2 text-gray-300">Status: <span className="font-bold">{selectedEvent.status}</span></p>
 
             {!failMode ? (
               <div className="flex justify-end gap-3 mt-4">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold"
+                  className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold text-gray-300"
                 >
-                  Cancel
+                  Cancel 
                 </button>
                 <button
                   onClick={markSuccess}
-                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold"
+                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold text-gray-300"
                 >
                   ✅ Success
                 </button>
                 <button
                   onClick={markFail}
-                  className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold"
+                  className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold text-gray-300"
                 >
                   ❌ Fail
                 </button>
@@ -234,13 +201,13 @@ export default function BloodBankAppointments() {
                 <div className="flex justify-end gap-3 mt-3">
                   <button
                     onClick={() => setFailMode(false)}
-                    className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold"
+                    className="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold text-gray-300"
                   >
                     Back
                   </button>
                   <button
                     onClick={submitFail}
-                    className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold"
+                    className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold text-gray-300"
                   >
                     Submit Fail
                   </button>

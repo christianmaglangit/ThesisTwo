@@ -15,17 +15,11 @@ export default function BloodbankSidebar() {
     { name: "Blood Requests", href: "/bloodbank/bloodbank_requests" },
     { name: "Generate QR Code", href: "/bloodbank/bloodbank_qrcode" },
     { name: "Bloodletting Campaign", href: "/bloodbank/bloodbank_campaigns" },
+    { name: "Hospital Blood Inventory", href: "/bloodbank/bloodbank_hospitalinventory" },
   ];
 
-  const handleLogout = () => {
-    // Optional: clear user session/localStorage here
-    // localStorage.removeItem("userToken");
-    // Redirect to homepage
-    window.location.href = "/";
-  };
-
   return (
-    <aside className="w-64 h-screen fixed left-0 top-0 bg-gray-900 text-white shadow-lg p-6 flex flex-col justify-between">
+    <aside className="w-64 h-screen fixed left-0 top-0 bg-white shadow-lg p-6 flex flex-col">
       <div>
         <h2 className="text-2xl font-bold text-red-500 mb-8">Blood Bank</h2>
         <nav className="flex flex-col space-y-4">
@@ -35,8 +29,8 @@ export default function BloodbankSidebar() {
               href={link.href}
               className={`px-4 py-2 rounded-lg transition ${
                 pathname === link.href
-                  ? "bg-red-600 text-white"
-                  : "text-gray-300 hover:bg-gray-700"
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "text-black hover:bg-red-700 hover:text-white"
               }`}
             >
               {link.name}
@@ -44,14 +38,6 @@ export default function BloodbankSidebar() {
           ))}
         </nav>
       </div>
-
-      {/* Logout Button */}
-      <button
-        onClick={handleLogout}
-        className="mt-6 w-full bg-gray-700 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold transition"
-      >
-        Logout
-      </button>
     </aside>
   );
 }

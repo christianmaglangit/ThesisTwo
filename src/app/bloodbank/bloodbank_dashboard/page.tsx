@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import BloodbankSidebar from "../components/bloodbank_sidebar";
+import BloodbankHeader from "../components/bloodbankheader";
 
 // Simple Card Component
 function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl shadow-lg p-6 bg-gray-800 text-white ${className || ""}`}>
+    <div className={`rounded-2xl shadow-lg p-6 bg-white text-black ${className || ""}`}>
       {children}
     </div>
   );
@@ -21,7 +22,7 @@ function NotificationHeader() {
   ]);
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-lg flex items-center justify-end px-6 ">
       <div className="relative">
         <button
           onClick={() => window.alert("Go to Notification Logs")}
@@ -63,19 +64,20 @@ export default function BloodBankDashboard() {
     <div className="flex">
       <BloodbankSidebar />
       <div className="ml-64 w-full">
+        <BloodbankHeader />
         <NotificationHeader />
 
-        <main className="pt-20 p-8 min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
-          <h1 className="text-3xl font-bold text-red-500 mb-8">Blood Bank Dashboard</h1>
+        <main className="pt-20 p-8 min-h-screen bg-gray-200 text-white">
+          <h1 className="text-3xl font-bold text-red-600 mb-8">Dashboard</h1>
 
           {/* Analytics Section */}
           <div className="grid lg:grid-cols-2 gap-6 mb-10">
             <Card>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4">Blood Units by Type</h2>
+              <h2 className="text-lg font-semibold text-black mb-4">Blood Units by Type</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={bloodData}>
-                  <XAxis dataKey="type" stroke="#aaa" />
-                  <YAxis stroke="#aaa" />
+                  <XAxis dataKey="type" stroke="#000" />
+                  <YAxis stroke="#000" />
                   <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }} />
                   <Bar dataKey="stock" fill="#ef4444" radius={[6, 6, 0, 0]} />
                 </BarChart>
@@ -83,10 +85,10 @@ export default function BloodBankDashboard() {
             </Card>
 
             <Card>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4">Recent Blood Requests</h2>
+              <h2 className="text-lg font-semibold text-black mb-4">Recent Blood Requests</h2>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-gray-400 border-b border-gray-700">
+                  <tr className="text-red-500 border-b border-gray-700">
                     <th className="text-left p-2">Request ID</th>
                     <th className="text-left p-2">Patient</th>
                     <th className="text-left p-2">Blood Type</th>
@@ -103,7 +105,7 @@ export default function BloodBankDashboard() {
                       <td
                         className={`p-2 ${
                           req.status === "Urgent"
-                            ? "text-red-400"
+                            ? "text-red-500"
                             : req.status === "Approved"
                             ? "text-green-400"
                             : "text-yellow-400"
@@ -111,7 +113,7 @@ export default function BloodBankDashboard() {
                       >
                         {req.status}
                       </td>
-                      <td className="p-2 text-gray-400">{req.date}</td>
+                      <td className="p-2 text-black">{req.date}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -122,15 +124,15 @@ export default function BloodBankDashboard() {
           {/* Quick Stats */}
           <div className="grid md:grid-cols-3 gap-6 mb-10">
             <Card>
-              <h2 className="text-lg font-semibold text-gray-300">Blood Inventory</h2>
+              <h2 className="text-lg font-semibold text-black">Blood Inventory</h2>
               <p className="text-3xl font-bold text-red-500 mt-2">4,500 Units</p>
             </Card>
             <Card>
-              <h2 className="text-lg font-semibold text-gray-300">Pending Blood Requests</h2>
+              <h2 className="text-lg font-semibold text-black">Pending Blood Requests</h2>
               <p className="text-3xl font-bold text-yellow-400 mt-2">12 Urgent</p>
             </Card>
             <Card>
-              <h2 className="text-lg font-semibold text-gray-300">Appointments</h2>
+              <h2 className="text-lg font-semibold text-black">Appointments</h2>
               <p className="text-3xl font-bold text-blue-400 mt-2">58 Scheduled</p>
             </Card>
           </div>
@@ -140,31 +142,31 @@ export default function BloodBankDashboard() {
             <Card>
               <div className="text-4xl mb-4">🩸</div>
               <h2 className="text-xl font-semibold mb-2">Manage Blood Inventory</h2>
-              <p className="text-gray-300 text-sm">Track and manage the current blood inventory.</p>
+              <p className="text-gray-600 text-sm">Track and manage the current blood inventory.</p>
             </Card>
 
             <Card>
               <div className="text-4xl mb-4">📅</div>
               <h2 className="text-xl font-semibold mb-2">Manage Donor Appointments</h2>
-              <p className="text-gray-300 text-sm">View and schedule donor appointments.</p>
+              <p className="text-gray-600 text-sm">View and schedule donor appointments.</p>
             </Card>
 
             <Card>
               <div className="text-4xl mb-4">📊</div>
               <h2 className="text-xl font-semibold mb-2">Predictive Reports Log</h2>
-              <p className="text-gray-300 text-sm">Generate and review predictive reports.</p>
+              <p className="text-gray-600 text-sm">Generate and review predictive reports.</p>
             </Card>
 
             <Card>
               <div className="text-4xl mb-4">🔑</div>
               <h2 className="text-xl font-semibold mb-2">Generate QR Code</h2>
-              <p className="text-gray-300 text-sm">Generate unique QR codes for blood donations and tracking.</p>
+              <p className="text-gray-600 text-sm">Generate unique QR codes for blood donations and tracking.</p>
             </Card>
 
             <Card>
               <div className="text-4xl mb-4">🎯</div>
               <h2 className="text-xl font-semibold mb-2">Manage Bloodletting Campaign</h2>
-              <p className="text-gray-300 text-sm">Plan and organize upcoming bloodletting campaigns.</p>
+              <p className="text-gray-600 text-sm">Plan and organize upcoming bloodletting campaigns.</p>
             </Card>
           </div>
         </main>

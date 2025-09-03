@@ -1,13 +1,25 @@
 "use client";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import ProfileModal from "./profile";
 
-export default function Navbar({
-  currentUser,
-  isDropdownOpen,
-  setIsDropdownOpen,
-  onLogout,
-  onOpenRequest, // open modal prop
-}: any) {
+interface NavbarProps {
+  onLogout: () => void;
+  onOpenRequest: () => void;  
+}
+
+export default function Navbar({ onLogout, onOpenRequest }: NavbarProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ name?: string; pic?: string }>({});
+
+  // Load user from localStorage
+  useEffect(() => {
+    const name = localStorage.getItem("profile_name") || "Sample Name";
+    const pic = localStorage.getItem("profile_image") || "/images/user.png";
+    setCurrentUser({ name, pic });
+  }, [isProfileOpen]); // reload after modal close
+
   return (
     <nav className="w-full fixed top-0 left-0 bg-white text-red-600 backdrop-blur-md z-50 shadow-md">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
@@ -21,7 +33,6 @@ export default function Navbar({
 
         {/* Actions */}
         <ul className="flex items-center gap-6">
-          {/* Request Blood Button */}
           <li>
             <button
               onClick={onOpenRequest}
@@ -41,13 +52,22 @@ export default function Navbar({
           {/* Profile Dropdown */}
           <li className="relative">
             <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-              <Image src="/images/user.png" width={30} height={30} alt="Profile" />
+              <Image src={currentUser.pic || "/images/user.png"} width={30} height={30} alt="Profile" className="rounded-full"/>
             </button>
             {isDropdownOpen && (
               <div className="absolute right-0 mt-3 w-48 bg-gray-800 rounded-lg shadow-xl overflow-hidden z-20">
                 <div className="px-4 py-2 text-gray-200 font-semibold border-b border-gray-700">
-                  {currentUser?.name || "Sample Name"}
+                  {currentUser?.name}
                 </div>
+                <button
+                  onClick={() => {
+                    setIsProfileOpen(true);
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700"
+                >
+                  Profile
+                </button>
                 <button className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700">
                   Settings
                 </button>
@@ -62,6 +82,9 @@ export default function Navbar({
           </li>
         </ul>
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </nav>
   );
 }

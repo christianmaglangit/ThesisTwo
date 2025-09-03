@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import BloodbankSidebar from "../components/bloodbank_sidebar";
+import BloodbankHeader from "../components/bloodbankheader";
 
 // Type for campaign
 interface BloodCampaign {
@@ -39,7 +40,7 @@ function NotificationHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-md text-white flex items-center justify-end px-6">
       <div className="relative">
         <button
           onClick={() => setOpen((prev) => !prev)}
@@ -126,9 +127,10 @@ export default function BloodlettingCampaigns() {
     <div className="flex">
       <BloodbankSidebar />
       <div className="ml-64 w-full">
+        <BloodbankHeader />
         <NotificationHeader />
-        <main className="pt-20 p-8 min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
-          <h1 className="text-3xl font-bold text-red-500 mb-6">Bloodletting Campaigns</h1>
+        <main className="pt-20 p-8 min-h-screen bg-gray-200 text-white">
+          <h1 className="text-3xl font-bold text-red-600 mb-6">Bloodletting Campaigns</h1>
 
           {/* Campaign list */}
           <div className="bg-white rounded-2xl shadow-lg p-6 text-black">
@@ -185,7 +187,7 @@ export default function BloodlettingCampaigns() {
 
           {/* Add campaign modal */}
           {showAddModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="fixed inset-0 backdrop-blur-smackdrop-blur-sm flex items-center justify-center z-50">
               <div className="bg-white rounded-2xl shadow-lg p-6 text-black max-w-lg w-full">
                 <h2 className="text-2xl font-semibold mb-4">Add New Campaign</h2>
                 <div className="mb-3">
@@ -253,7 +255,7 @@ export default function BloodlettingCampaigns() {
 
           {/* Edit campaign modal */}
           {editingCampaign && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
               <div className="bg-white rounded-2xl shadow-lg p-6 text-black max-w-lg w-full">
                 <h2 className="text-2xl font-semibold mb-4">Edit Campaign</h2>
                 <div className="mb-3">
@@ -331,5 +333,5 @@ export default function BloodlettingCampaigns() {
         </main>
       </div>
     </div>
-  );
+  );  
 }

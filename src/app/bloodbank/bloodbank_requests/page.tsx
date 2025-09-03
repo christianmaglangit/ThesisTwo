@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import BloodbankSidebar from "../components/bloodbank_sidebar";
+import BloodbankHeader from "../components/bloodbankheader";
 
 // Simple Card Component
 function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl shadow-lg p-6 bg-gray-800 text-white ${className || ""}`}>
+    <div className={`rounded-2xl shadow-lg p-6 bg-white text-black ${className || ""}`}>
       {children}
     </div>
   );
@@ -21,7 +22,7 @@ function NotificationHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-gray-900 text-white flex items-center justify-end px-6 shadow z-50">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-md text-white flex items-center justify-end px-6">
       <div className="relative">
         <button
           onClick={() => setOpen((prev) => !prev)}
@@ -95,16 +96,17 @@ export default function ManageBloodRequests() {
     <div className="flex">
       <BloodbankSidebar />
       <div className="ml-64 w-full">
+        <BloodbankHeader />
         <NotificationHeader />
 
-        <main className="pt-20 p-8 min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+        <main className="pt-20 p-8 min-h-screen bg-gray-200 text-white">
           <h1 className="text-3xl font-bold text-red-500 mb-6">Manage Blood Requests</h1>
 
           <Card>
             <div className="overflow-x-auto">
               <table className="w-full text-sm table-auto border-collapse">
                 <thead>
-                  <tr className="bg-gray-700 text-white">
+                  <tr className="bg-red-400 text-white">
                     <th className="border px-4 py-2">Requester</th>
                     <th className="border px-4 py-2">Blood Type</th>
                     <th className="border px-4 py-2">Units</th>
@@ -138,13 +140,13 @@ export default function ManageBloodRequests() {
                           <>
                             <button
                               onClick={() => handleApprove(req.id)}
-                              className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded"
+                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
                             >
                               Approve
                             </button>
                             <button
                               onClick={() => handleReject(req.id)}
-                              className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                             >
                               Reject
                             </button>
