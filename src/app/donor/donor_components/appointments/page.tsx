@@ -34,7 +34,7 @@ interface AppointmentEvent extends Event {
   status: string;
 }
 
-// Always show sample donors on first load
+// Sample appointments on load
 const sampleAppointments: AppointmentEvent[] = [
   {
     id: 1,
@@ -76,6 +76,7 @@ export default function DonorAppointmentsPage({
   const [view, setView] = useState<View>("week");
   const [date, setDate] = useState<Date>(new Date("2025-09-09"));
 
+  // Load appointments from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("donor_appointments");
     if (saved) {
@@ -92,11 +93,30 @@ export default function DonorAppointmentsPage({
     }
   }, []);
 
+  // Save appointments to localStorage
   useEffect(() => {
     if (events.length > 0) {
       localStorage.setItem("donor_appointments", JSON.stringify(events));
     }
   }, [events]);
+
+  // 🔴 Helper: Save currently selected appointment for dashboard display
+  const saveSelectedAppointment = (appointment: AppointmentEvent | null) => {
+    if (appointment) {
+      localStorage.setItem(
+        "donor_selected_appointment",
+        JSON.stringify({
+          date: appointment.start.toLocaleDateString(),
+          time: appointment.start.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        })
+      );
+    } else {
+      localStorage.removeItem("donor_selected_appointment");
+    }
+  };
 
   // Check if slot is available
   const isSlotAvailable = (slotStart: Date, slotEnd: Date) => {
@@ -124,9 +144,7 @@ export default function DonorAppointmentsPage({
         `You already have an appointment on ${myAppointment.start.toLocaleString()}.\nDo you want to reschedule to ${slotInfo.start.toLocaleString()}?`
       );
       if (confirmReschedule) {
-        const updatedEvents = events.filter(
-          (ev) => ev.donor !== currentUser
-        );
+        const updatedEvents = events.filter((ev) => ev.donor !== currentUser);
         const newEvent: AppointmentEvent = {
           id: events.length + 1,
           title: currentUser,
@@ -137,6 +155,7 @@ export default function DonorAppointmentsPage({
           status: "Pending",
         };
         setEvents([...updatedEvents, newEvent]);
+        saveSelectedAppointment(newEvent); // ✅ save
         alert(`Your appointment has been rescheduled.`);
       }
     } else {
@@ -156,6 +175,7 @@ export default function DonorAppointmentsPage({
       };
 
       setEvents([...events, newEvent]);
+      saveSelectedAppointment(newEvent); // ✅ save
       alert(`Appointment booked on ${slotInfo.start.toLocaleString()}`);
     }
   };
@@ -168,6 +188,7 @@ export default function DonorAppointmentsPage({
       );
       if (confirmRemove) {
         setEvents(events.filter((ev) => ev.id !== event.id));
+        saveSelectedAppointment(null); // ✅ clear
         alert("Your appointment has been cancelled.");
       }
     } else {
@@ -180,7 +201,7 @@ export default function DonorAppointmentsPage({
     const baseClasses =
       "rounded-md px-2 py-1 text-white text-sm font-medium shadow";
     let backgroundColor =
-      event.status === "Pending" ? "bg-white" : "bg-red-500";
+      event.status === "Pending" ? "bg-gray-500" : "bg-red-600";
     return {
       className: `${baseClasses} ${backgroundColor}`,
     };

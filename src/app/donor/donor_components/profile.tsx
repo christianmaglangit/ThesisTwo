@@ -6,49 +6,62 @@ interface ProfileModalProps {
   onClose: () => void;
 }
 
-const bloodTypes = [
-  "", "O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"
-];
+const bloodTypes = ["", "O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
+const genders = ["", "Male", "Female", "Other"];
 
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [cellphone, setCellphone] = useState("");
-  const [address, setAddress] = useState("");
-  const [bloodType, setBloodType] = useState("");
-  const [image, setImage] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState({
+    name: "",
+    age: "",
+    gender: "",
+    cellphone: "",
+    address: "",
+    bloodType: "",
+    email: "",
+    password: "",
+    image: null as string | null,
+  });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load saved profile from localStorage
+  // Load saved profile
   useEffect(() => {
-    setName(localStorage.getItem("profile_name") || "");
-    setAge(localStorage.getItem("profile_age") || "");
-    setCellphone(localStorage.getItem("profile_cellphone") || "");
-    setAddress(localStorage.getItem("profile_address") || "");
-    setBloodType(localStorage.getItem("profile_bloodtype") || "");
-    setImage(localStorage.getItem("profile_image") || null);
+    setProfile({
+      name: localStorage.getItem("profile_name") || "",
+      age: localStorage.getItem("profile_age") || "",
+      gender: localStorage.getItem("profile_gender") || "",
+      cellphone: localStorage.getItem("profile_cellphone") || "",
+      address: localStorage.getItem("profile_address") || "",
+      bloodType: localStorage.getItem("profile_bloodtype") || "",
+      email: localStorage.getItem("profile_email") || "",
+      password: localStorage.getItem("profile_password") || "",
+      image: localStorage.getItem("profile_image") || null,
+    });
   }, []);
+
+  // Handle input change
+  const handleChange = (field: string, value: string) => {
+    setProfile((prev) => ({ ...prev, [field]: value }));
+  };
 
   // Save profile
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("profile_name", name);
-    localStorage.setItem("profile_age", age);
-    localStorage.setItem("profile_cellphone", cellphone);
-    localStorage.setItem("profile_address", address);
-    localStorage.setItem("profile_bloodtype", bloodType);
-    if (image) localStorage.setItem("profile_image", image);
-    onClose();
+    Object.entries(profile).forEach(([key, value]) => {
+      if (value) localStorage.setItem(`profile_${key}`, value.toString());
+    });
+    setIsEditing(false); // Exit edit mode but keep modal open
+    alert("✅ Profile saved successfully!");
   };
 
-  // Handle image upload + convert to base64
+  // Image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result as string);
-        // Reset file input so same file can be uploaded again if needed
+        setProfile((prev) => ({ ...prev, image: reader.result as string }));
         if (fileInputRef.current) fileInputRef.current.value = "";
       };
       reader.readAsDataURL(file);
@@ -58,7 +71,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex min-h-screen items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex min-h-screen items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
         {/* Close button */}
         <button
@@ -68,18 +81,16 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           ✕
         </button>
 
-        {/* Title */}
-        <h2 className="text-xl font-bold text-red-600 mb-4 text-center">
-          Edit Profile
+        <h2 className="text-xl font-bold text-red-600 text-center mb-4">
+          Profile
         </h2>
 
-        {/* Profile Form */}
         <form onSubmit={handleSave} className="space-y-4">
           {/* Profile Picture */}
           <div className="flex flex-col items-center mb-2">
-            {image ? (
+            {profile.image ? (
               <img
-                src={image}
+                src={profile.image}
                 alt="Profile"
                 className="w-24 h-24 rounded-full object-cover mb-2 border"
               />
@@ -88,77 +99,139 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 <span className="text-gray-500 text-sm">No Photo</span>
               </div>
             )}
+            {isEditing && (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="text-sm text-gray-600"
+              />
+            )}
+          </div>
+
+          {/* Personal Info */}
+          <div className="grid grid-cols-1 gap-3">
             <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="text-sm text-gray-600"
+              type="text"
+              placeholder="Full Name"
+              value={profile.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-2"
+              required
+              disabled={!isEditing}
+            />
+
+            <div className="flex gap-3">
+              <input
+                type="number"
+                placeholder="Age"
+                value={profile.age}
+                onChange={(e) => handleChange("age", e.target.value)}
+                className="w-1/2 border border-gray-300 rounded-lg p-2"
+                min={1}
+                required
+                disabled={!isEditing}
+              />
+              <select
+                value={profile.gender}
+                onChange={(e) => handleChange("gender", e.target.value)}
+                className="w-1/2 border border-gray-300 rounded-lg p-2"
+                required
+                disabled={!isEditing}
+              >
+                <option value="">Gender</option>
+                {genders.slice(1).map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <input
+              type="tel"
+              placeholder="Cellphone Number"
+              value={profile.cellphone}
+              onChange={(e) => handleChange("cellphone", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-2"
+              disabled={!isEditing}
+            />
+
+            <input
+              type="text"
+              placeholder="Address"
+              value={profile.address}
+              onChange={(e) => handleChange("address", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-2"
+              required
+              disabled={!isEditing}
             />
           </div>
 
-          {/* Name */}
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2"
-            required
-          />
-
-          {/* Age */}
-          <input
-            type="number"
-            placeholder="Age"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2"
-            required
-            min={1}
-          />
-
-          {/* Cellphone Number */}
-          <input
-            type="tel"
-            placeholder="Cellphone Number"
-            value={cellphone}
-            onChange={(e) => setCellphone(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2"
-            required
-            pattern="^(09|\+639)\d{9}$"
-            title="Enter a valid Philippine cellphone number"
-          />
-
-          {/* Address */}
-          <input
-            type="text"
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2"
-            required
-          />
-
-          {/* Blood Type (Optional) */}
+          {/* Medical Info */}
           <select
-            value={bloodType}
-            onChange={(e) => setBloodType(e.target.value)}
+            value={profile.bloodType}
+            onChange={(e) => handleChange("bloodType", e.target.value)}
             className="w-full border border-gray-300 rounded-lg p-2"
+            disabled={!isEditing}
           >
             <option value="">Select Blood Type (Optional)</option>
             {bloodTypes.slice(1).map((type) => (
-              <option key={type} value={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
 
-          {/* Save Button */}
-          <button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg"
-          >
-            Save Profile
-          </button>
+          {/* Account Info */}
+          <div className="grid grid-cols-1 gap-3">
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={profile.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-2"
+              required
+              disabled={!isEditing}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={profile.password}
+              onChange={(e) => handleChange("password", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-2"
+              required
+              disabled={!isEditing}
+            />
+          </div>
+
+          {/* Buttons */}
+          {isEditing ? (
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg"
+              >
+                Save Profile
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 rounded-lg"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg"
+            >
+              Edit Profile
+            </button>
+          )}
         </form>
       </div>
     </div>

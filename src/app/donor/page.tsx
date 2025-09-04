@@ -18,6 +18,15 @@ export default function DashdonorPage() {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState<boolean>(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
+  // Default appointment sample
+  const [selectedAppointment, setSelectedAppointment] = useState<{
+    date: string;
+    time: string;
+  } | null>({
+    date: "September 9, 2025",
+    time: "10:00 AM",
+  });
+
   const router = useRouter();
 
   useEffect(() => {
@@ -41,7 +50,11 @@ export default function DashdonorPage() {
       />
 
       {/* Hero / Appointments */}
-      <HeroSection currentUser={currentUser} />
+      <HeroSection
+        currentUser={currentUser}
+        onAppointmentSelect={setSelectedAppointment}
+        selectedAppointment={selectedAppointment}
+      />
 
       {/* Blood Journey */}
       <BloodJourney />
@@ -51,6 +64,8 @@ export default function DashdonorPage() {
         <DonationHistory isOpen={isHistoryOpen} setIsOpen={setIsHistoryOpen} />
         <UpcomingCampaigns />
       </div>
+
+      <div className="mt-8"></div>
 
       {/* Blood Available Section */}
       <BloodAvailable />

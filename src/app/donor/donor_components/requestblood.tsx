@@ -6,6 +6,7 @@ export default function RequestBlood() {
   const [formData, setFormData] = useState({
     name: "",
     bloodType: "",
+    bloodComponent: "",
     bloodBagNeeded: "",
     hospital: "",
     neededDate: "",
@@ -15,7 +16,9 @@ export default function RequestBlood() {
     mayorReferral: null as File | null,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -79,6 +82,21 @@ export default function RequestBlood() {
           />
         </div>
 
+        {/* New Blood Component Dropdown */}
+        <select
+          name="bloodComponent"
+          value={formData.bloodComponent}
+          onChange={handleChange}
+          className="border p-2 rounded"
+          required
+        >
+          <option value="">Select Blood Component</option>
+          <option value="Red Blood Cells">Red Blood Cells</option>
+          <option value="Plasma">Plasma</option>
+          <option value="Platelets">Platelets</option>
+          <option value="Whole Blood">Whole Blood</option>
+        </select>
+
         <input
           type="text"
           name="hospital"
@@ -92,7 +110,9 @@ export default function RequestBlood() {
         {/* File Inputs Grid */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Blood Request Form</label>
+            <label className="block text-sm font-medium mb-1">
+              Blood Request Form
+            </label>
             <input
               type="file"
               name="bloodRequestForm"
@@ -102,7 +122,9 @@ export default function RequestBlood() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Barangay Indigency</label>
+            <label className="block text-sm font-medium mb-1">
+              Barangay Indigency
+            </label>
             <input
               type="file"
               name="barangayIndigency"
@@ -112,7 +134,9 @@ export default function RequestBlood() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Senior ID (Optional)</label>
+            <label className="block text-sm font-medium mb-1">
+              Senior ID (Optional)
+            </label>
             <input
               type="file"
               name="seniorId"
@@ -121,7 +145,9 @@ export default function RequestBlood() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Mayor&apos;s Referral Note</label>
+            <label className="block text-sm font-medium mb-1">
+              Mayor&apos;s Referral Note
+            </label>
             <input
               type="file"
               name="mayorReferral"

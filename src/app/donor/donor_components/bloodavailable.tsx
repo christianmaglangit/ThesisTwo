@@ -8,10 +8,14 @@ const hospitals = [
     address: "123 Health St, Manila",
     city: "Manila",
     stocks: {
-      "O+": "Available",
-      "A+": "Available",
-      "B+": "Low Stock",
-      "AB+": "Critical",
+      "O+": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Critical" },
+      "O-": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Critical", "Whole Blood": "Available" },
+      "A+": { "Red Blood Cells": "Available", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "A-": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "B+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Available", "Whole Blood": "Critical" },
+      "B-": { "Red Blood Cells": "Critical", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Available" },
+      "AB+": { "Red Blood Cells": "Critical", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Available" },
+      "AB-": { "Red Blood Cells": "Available", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Critical" },
     },
   },
   {
@@ -19,10 +23,14 @@ const hospitals = [
     address: "456 Wellness Ave, Manila",
     city: "Manila",
     stocks: {
-      "O+": "Low Stock",
-      "A+": "Available",
-      "B+": "Available",
-      "AB+": "Low Stock",
+      "O+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "O-": { "Red Blood Cells": "Available", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "A+": { "Red Blood Cells": "Available", Plasma: "Available", Platelets: "Critical", "Whole Blood": "Available" },
+      "A-": { "Red Blood Cells": "Critical", Plasma: "Available", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "B+": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Critical" },
+      "B-": { "Red Blood Cells": "Low Stock", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Available" },
+      "AB+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "AB-": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Critical", "Whole Blood": "Available" },
     },
   },
   {
@@ -30,15 +38,20 @@ const hospitals = [
     address: "789 Care Blvd, Makati",
     city: "Makati",
     stocks: {
-      "O+": "Critical",
-      "A+": "Low Stock",
-      "B+": "Available",
-      "AB+": "Available",
+      "O+": { "Red Blood Cells": "Critical", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "O-": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Critical", "Whole Blood": "Available" },
+      "A+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Available", "Whole Blood": "Critical" },
+      "A-": { "Red Blood Cells": "Available", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "B+": { "Red Blood Cells": "Available", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "B-": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Available", "Whole Blood": "Critical" },
+      "AB+": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Critical" },
+      "AB-": { "Red Blood Cells": "Critical", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
     },
   },
 ];
 
-const bloodTypes = ["O+", "A+", "B+", "AB+"];
+const bloodTypes = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
+const components = ["Red Blood Cells", "Plasma", "Platelets", "Whole Blood"];
 
 function getStatusColor(status: string) {
   if (status === "Available") return "bg-green-100 text-green-700";
@@ -50,12 +63,14 @@ function getStatusColor(status: string) {
 export default function BloodAvailable() {
   const [city, setCity] = useState("");
   const [bloodType, setBloodType] = useState("A+");
+  const [component, setComponent] = useState("Red Blood Cells");
 
-  // Always filter hospitals dynamically (no need for button anymore)
+  // Always filter hospitals dynamically
   const filteredHospitals = hospitals.filter(
     (h) =>
       (!city || h.city.toLowerCase().includes(city.toLowerCase())) &&
-      h.stocks[bloodType]
+      h.stocks[bloodType] &&
+      h.stocks[bloodType][component]
   );
 
   return (
@@ -88,12 +103,27 @@ export default function BloodAvailable() {
             ))}
           </select>
         </div>
+        <div className="flex flex-col min-w-[160px]">
+          <label className="text-sm font-semibold mb-1">Component</label>
+          <select
+            value={component}
+            onChange={(e) => setComponent(e.target.value)}
+            className="border rounded-lg px-3 py-2 text-gray-700"
+          >
+            {components.map((comp) => (
+              <option key={comp} value={comp}>
+                {comp}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Results */}
       <div>
         <div className="mb-3 text-base font-semibold text-gray-700">
-          Showing results for <span className="text-red-600">{bloodType}</span>
+          Showing results for <span className="text-red-600">{bloodType}</span> (
+          <span className="text-red-600">{component}</span>)
           {city && (
             <>
               {" "}in <span className="text-red-600">{city}</span>
@@ -117,10 +147,10 @@ export default function BloodAvailable() {
                 </div>
                 <span
                   className={`px-4 py-1 rounded-full text-sm font-semibold ${getStatusColor(
-                    h.stocks[bloodType]
+                    h.stocks[bloodType][component]
                   )}`}
                 >
-                  {h.stocks[bloodType]}
+                  {h.stocks[bloodType][component]}
                 </span>
               </div>
             ))
