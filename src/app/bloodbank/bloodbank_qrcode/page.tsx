@@ -14,7 +14,7 @@ function Card({ children, className }: { children: React.ReactNode; className?: 
   );
 }
 
-// ✅ Notification Header with dropdown (like Appointment page)
+// ✅ Notification Header with dropdown
 function NotificationHeader() {
   const [open, setOpen] = useState(false);
 
@@ -25,7 +25,7 @@ function NotificationHeader() {
   ];
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-md text-white flex items-center justify-end px-6">
+    <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-md flex items-center justify-end px-6">
       <div className="relative">
         {/* Bell */}
         <button
@@ -65,16 +65,20 @@ function NotificationHeader() {
 
 export default function GenerateQRCode() {
   const [donorName, setDonorName] = useState("");
-  const [bloodType, setBloodType] = useState("");
+  const [bloodType, setBloodType] = useState("O+");
+  const [bloodComponent, setBloodComponent] = useState("Whole Blood");
   const [donorId, setDonorId] = useState("");
   const [qrValue, setQrValue] = useState("");
   const [showModal, setShowModal] = useState(false);
 
   const qrRef = useRef<HTMLDivElement>(null);
 
+  const bloodTypes = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
+  const bloodComponents = ["Whole Blood", "Plasma", "Platelets", "Red Blood Cells"];
+
   const handleGenerate = () => {
-    if (!donorName || !bloodType || !donorId) return;
-    const data = `DonorID: ${donorId}\nName: ${donorName}\nBloodType: ${bloodType}`;
+    if (!donorName || !bloodType || !donorId || !bloodComponent) return;
+    const data = `DonorID: ${donorId}\nName: ${donorName}\nBloodType: ${bloodType}\nComponent: ${bloodComponent}`;
     setQrValue(data);
     setShowModal(true);
   };
@@ -114,6 +118,7 @@ export default function GenerateQRCode() {
           <h1 className="text-3xl font-bold text-red-500 mb-6">Generate Donor QR Code</h1>
 
           <Card className="max-w-lg mx-auto">
+            {/* Donor ID */}
             <div className="mb-4">
               <label className="block mb-1 font-semibold">Donor ID</label>
               <input
@@ -124,6 +129,7 @@ export default function GenerateQRCode() {
               />
             </div>
 
+            {/* Donor Name */}
             <div className="mb-4">
               <label className="block mb-1 font-semibold">Donor Name</label>
               <input
@@ -134,16 +140,39 @@ export default function GenerateQRCode() {
               />
             </div>
 
+            {/* Blood Type Dropdown */}
             <div className="mb-4">
               <label className="block mb-1 font-semibold">Blood Type</label>
-              <input
-                type="text"
+              <select
                 value={bloodType}
                 onChange={(e) => setBloodType(e.target.value)}
                 className="w-full border px-3 py-2 rounded"
-              />
+              >
+                {bloodTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* Blood Component Dropdown */}
+            <div className="mb-4">
+              <label className="block mb-1 font-semibold">Blood Component</label>
+              <select
+                value={bloodComponent}
+                onChange={(e) => setBloodComponent(e.target.value)}
+                className="w-full border px-3 py-2 rounded"
+              >
+                {bloodComponents.map((comp) => (
+                  <option key={comp} value={comp}>
+                    {comp}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Generate Button */}
             <button
               onClick={handleGenerate}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold w-full"
@@ -165,7 +194,10 @@ export default function GenerateQRCode() {
                 <h2 className="text-2xl font-semibold mb-4 text-center">Donor QR Code</h2>
                 <div ref={qrRef} className="flex flex-col items-center">
                   <QRCodeCanvas value={qrValue} size={200} bgColor="#ffffff" fgColor="#000000" />
-                  <p className="mt-2 font-semibold">{donorName} ({bloodType})</p>
+                  <p className="mt-2 font-semibold">
+                    {donorName} ({bloodType})
+                  </p>
+                  <p className="text-sm text-gray-600">Component: {bloodComponent}</p>
                   <p className="text-sm text-gray-600">ID: {donorId}</p>
                 </div>
                 <div className="mt-4 flex justify-center">

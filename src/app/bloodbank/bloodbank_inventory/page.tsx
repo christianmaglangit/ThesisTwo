@@ -16,13 +16,16 @@ function Card({ children, className }: { children: React.ReactNode; className?: 
 type BloodInventoryItem = {
   id: number;
   type: string;
+  component: string;
   units: number;
   collectedAt: string;
   expiresAt: string;
 };
 
 const allBloodTypes = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
+const bloodComponents = ["Whole Blood", "Plasma", "Platelets", "Red Blood Cells"];
 
+// Helpers
 function formatDateTime(dateStr: string) {
   if (!dateStr) return "";
   const date = new Date(dateStr);
@@ -57,50 +60,64 @@ function getExpiryColor(expiry: string) {
   return "text-green-400 font-bold";
 }
 
-// ✅ Sorting helper → expired first, then soon-to-expire, then safe ones
+// ✅ Sorting helper
 function sortByExpiry(a: BloodInventoryItem, b: BloodInventoryItem) {
   const today = new Date();
-
   const expA = new Date(a.expiresAt).getTime();
   const expB = new Date(b.expiresAt).getTime();
-
   const diffA = expA - today.getTime();
   const diffB = expB - today.getTime();
-
-  // Expired first
   if (diffA < 0 && diffB >= 0) return -1;
   if (diffB < 0 && diffA >= 0) return 1;
-
-  // Both expired → earlier expiry first
   if (diffA < 0 && diffB < 0) return expA - expB;
-
-  // Expiring soon first (within 7 days)
   if (diffA <= 7 * 24 * 60 * 60 * 1000 && diffB > 7 * 24 * 60 * 60 * 1000) return -1;
   if (diffB <= 7 * 24 * 60 * 60 * 1000 && diffA > 7 * 24 * 60 * 60 * 1000) return 1;
-
-  // Otherwise → earliest expiry first
   return expA - expB;
+}
+
+// 🔹 Generate Example Data (5 items each type)
+function generateMockInventory(): BloodInventoryItem[] {
+  const items: BloodInventoryItem[] = [];
+  const now = new Date();
+
+  allBloodTypes.forEach((type, tIndex) => {
+    for (let i = 0; i < 5; i++) {
+      const collectedAt = new Date(now.getTime() - i * 24 * 60 * 60 * 1000); // collected past i days
+      const expiresAt = new Date(collectedAt.getTime() + (20 + i * 2) * 24 * 60 * 60 * 1000); // expires in ~20+ days
+      items.push({
+        id: Date.now() + tIndex * 10 + i,
+        type,
+        component: bloodComponents[i % bloodComponents.length],
+        units: 1 + (i % 5),
+        collectedAt: collectedAt.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+      });
+    }
+  });
+
+  return items;
 }
 
 export default function BloodBankInventory() {
   const [inventory, setInventory] = useState<BloodInventoryItem[]>([]);
   const [activeSheet, setActiveSheet] = useState("O+");
+  const [component, setComponent] = useState("Whole Blood");
   const [amount, setAmount] = useState<number>(0);
   const [collectedAt, setCollectedAt] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
-  const [notifications] = useState([
-    { id: 1, message: "New blood request pending" },
-    { id: 2, message: "Low stock: O-" },
-    { id: 3, message: "Inventory updated successfully" },
-  ]);
-  const [notifOpen, setNotifOpen] = useState(false);
-
+  // Load initial data
   useEffect(() => {
     const saved = localStorage.getItem("bloodInventory");
-    if (saved) setInventory(JSON.parse(saved));
+    if (saved) {
+      setInventory(JSON.parse(saved));
+    } else {
+      const mock = generateMockInventory();
+      setInventory(mock);
+      localStorage.setItem("bloodInventory", JSON.stringify(mock));
+    }
   }, []);
 
   useEffect(() => {
@@ -119,6 +136,7 @@ export default function BloodBankInventory() {
             ? {
                 ...item,
                 units: amount,
+                component,
                 collectedAt: collectedAt || defaultCollected,
                 expiresAt: expiresAt || defaultExpiry,
               }
@@ -130,6 +148,7 @@ export default function BloodBankInventory() {
       const newEntry: BloodInventoryItem = {
         id: Date.now(),
         type: activeSheet,
+        component,
         units: amount,
         collectedAt: collectedAt || defaultCollected,
         expiresAt: expiresAt || defaultExpiry,
@@ -148,6 +167,7 @@ export default function BloodBankInventory() {
 
   const handleEditUnits = (item: BloodInventoryItem) => {
     setAmount(item.units);
+    setComponent(item.component);
     setCollectedAt(item.collectedAt);
     setExpiresAt(item.expiresAt);
     setEditId(item.id);
@@ -163,18 +183,15 @@ export default function BloodBankInventory() {
         <main className="pt-20 p-8 min-h-screen bg-gray-200 text-black">
           <h1 className="text-3xl font-bold text-red-500 mb-8">Manage Blood Inventory</h1>
 
-          {/* Inventory Table (inside card) */}
+          {/* Inventory Table */}
           <Card className="mb-8 overflow-x-auto">
-            {/* Blood Type Sheet Buttons */}
             <div className="flex flex-wrap gap-3 mb-6 text-white">
               {allBloodTypes.map((type) => (
                 <button
                   key={type}
                   onClick={() => setActiveSheet(type)}
                   className={`px-4 py-2 rounded-lg font-semibold ${
-                    activeSheet === type
-                      ? "bg-red-600 text-white"
-                      : "bg-gray-700 hover:bg-gray-600"
+                    activeSheet === type ? "bg-red-600 text-white" : "bg-gray-700 hover:bg-gray-600"
                   }`}
                 >
                   {type} Sheet
@@ -182,16 +199,15 @@ export default function BloodBankInventory() {
               ))}
             </div>
 
-            {/* Inventory Title */}
             <h2 className="text-xl font-semibold mb-4 text-gray-700">
               {activeSheet} Inventory
             </h2>
 
-            {/* Table */}
-            <table className="w-full text-sm min-w-[600px]">
+            <table className="w-full text-sm min-w-[700px]">
               <thead>
                 <tr className="text-gray-400 border-b border-gray-700">
                   <th className="text-left p-3 text-gray-700">Blood Type</th>
+                  <th className="text-left p-3 text-gray-700">Component</th>
                   <th className="text-left p-3 text-gray-700">Units</th>
                   <th className="text-left p-3 text-gray-700">Collected At</th>
                   <th className="text-left p-3 text-gray-700">Expiry Date</th>
@@ -202,10 +218,11 @@ export default function BloodBankInventory() {
               <tbody>
                 {inventory
                   .filter((item) => item.type === activeSheet)
-                  .sort(sortByExpiry) // ✅ Expired first, then soon-to-expire
+                  .sort(sortByExpiry)
                   .map((item) => (
                     <tr key={item.id} className="border-b border-gray-700">
                       <td className="p-3">{item.type}</td>
+                      <td className="p-3">{item.component}</td>
                       <td className="p-3">{item.units}</td>
                       <td className="p-3">{formatDateTime(item.collectedAt)}</td>
                       <td className="p-3">{formatDate(item.expiresAt)}</td>
@@ -236,7 +253,6 @@ export default function BloodBankInventory() {
               </tbody>
             </table>
 
-            {/* Add Stock Button */}
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => {
@@ -244,6 +260,7 @@ export default function BloodBankInventory() {
                   setAmount(0);
                   setCollectedAt("");
                   setExpiresAt("");
+                  setComponent("Whole Blood");
                   setShowModal(true);
                 }}
                 className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 text-white"
@@ -261,6 +278,18 @@ export default function BloodBankInventory() {
                   {editId ? "Edit" : "Add"} {activeSheet} Stock
                 </h2>
                 <div className="flex flex-col gap-4">
+                  <select
+                    value={component}
+                    onChange={(e) => setComponent(e.target.value)}
+                    className="bg-gray-200 text-black p-2 rounded-lg w-full"
+                  >
+                    {bloodComponents.map((comp) => (
+                      <option key={comp} value={comp}>
+                        {comp}
+                      </option>
+                    ))}
+                  </select>
+
                   <input
                     type="number"
                     value={amount}

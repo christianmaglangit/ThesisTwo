@@ -61,6 +61,7 @@ interface BloodRequest {
   id: number;
   requester: string;
   bloodType: string;
+  component: string;
   units: number;
   status: "Pending" | "Approved" | "Rejected";
   date: string;
@@ -68,11 +69,11 @@ interface BloodRequest {
 
 // Mock requests
 const mockRequests: BloodRequest[] = [
-  { id: 1, requester: "St. Peter Hospital", bloodType: "O+", units: 5, status: "Pending", date: "2025-08-26" },
-  { id: 2, requester: "City Clinic", bloodType: "A-", units: 3, status: "Approved", date: "2025-08-27" },
-  { id: 3, requester: "Health Center", bloodType: "B+", units: 2, status: "Pending", date: "2025-08-28" },
-  { id: 4, requester: "Red Cross Branch", bloodType: "AB-", units: 4, status: "Rejected", date: "2025-08-29" },
-  { id: 5, requester: "Community Hospital", bloodType: "O-", units: 6, status: "Pending", date: "2025-08-30" },
+  { id: 1, requester: "St. Peter Hospital", bloodType: "O+", component: "Red Blood Cells", units: 5, status: "Pending", date: "2025-08-26" },
+  { id: 2, requester: "City Clinic", bloodType: "A-", component: "Plasma", units: 3, status: "Approved", date: "2025-08-27" },
+  { id: 3, requester: "Health Center", bloodType: "B+", component: "Platelets", units: 2, status: "Pending", date: "2025-08-28" },
+  { id: 4, requester: "Red Cross Branch", bloodType: "AB-", component: "Cryoprecipitate", units: 4, status: "Rejected", date: "2025-08-29" },
+  { id: 5, requester: "Community Hospital", bloodType: "O-", component: "Plasma", units: 6, status: "Pending", date: "2025-08-30" },
 ];
 
 export default function ManageBloodRequests() {
@@ -109,6 +110,7 @@ export default function ManageBloodRequests() {
                   <tr className="bg-red-400 text-white">
                     <th className="border px-4 py-2">Requester</th>
                     <th className="border px-4 py-2">Blood Type</th>
+                    <th className="border px-4 py-2">Component</th>
                     <th className="border px-4 py-2">Units</th>
                     <th className="border px-4 py-2">Date</th>
                     <th className="border px-4 py-2">Status</th>
@@ -120,6 +122,7 @@ export default function ManageBloodRequests() {
                     <tr key={req.id} className="text-center border-b border-gray-600">
                       <td className="px-4 py-2">{req.requester}</td>
                       <td className="px-4 py-2">{req.bloodType}</td>
+                      <td className="px-4 py-2">{req.component}</td>
                       <td className="px-4 py-2">{req.units}</td>
                       <td className="px-4 py-2">{req.date}</td>
                       <td>

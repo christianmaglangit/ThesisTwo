@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import BloodbankSidebar from "../components/bloodbank_sidebar";
 import BloodbankHeader from "../components/bloodbankheader";
 import { Calendar, dateFnsLocalizer, Event, View } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
+import { format, parse, startOfWeek, getDay, addDays, addWeeks, setHours, setMinutes } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -29,7 +29,7 @@ interface AppointmentEvent extends Event {
   status: string;
 }
 
-// Generate mock data
+// Generate dynamic mock appointments
 const generateMockAppointments = (): AppointmentEvent[] => {
   const donors = [
     "Juan Dela Cruz","Maria Santos","Pedro Reyes","Ana Lim","Carlos Dizon",
@@ -41,11 +41,24 @@ const generateMockAppointments = (): AppointmentEvent[] => {
   const bloodTypes = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
   const statuses = ["Pending", "Approved"];
 
+  const today = new Date();
+  const nextTuesday = addWeeks(startOfWeek(today, { weekStartsOn: 1 }), 1); // Next week's Monday
+  const tuesday = addDays(nextTuesday, 1); // Tuesday of that week
+
   return donors.map((donor, index) => {
-    const day = 26 + Math.floor(index / 5);
+    // Distribute appointments: today, next Tuesday, then following days
+    let baseDate: Date;
+    if (index < 5) {
+      baseDate = today; // Today
+    } else if (index < 10) {
+      baseDate = tuesday; // Next Tuesday
+    } else {
+      baseDate = addDays(today, index); // Spread across coming days
+    }
+
     const hour = 9 + (index % 5);
-    const start = new Date(2025, 7, day, hour, 0);
-    const end = new Date(2025, 7, day, hour + 1, 0);
+    const start = setMinutes(setHours(baseDate, hour), 0);
+    const end = setMinutes(setHours(baseDate, hour + 1), 0);
 
     return {
       id: index + 1,
