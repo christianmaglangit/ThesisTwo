@@ -1,62 +1,80 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import BloodbankSidebar from "../components/bloodbank_sidebar";
 import BloodbankHeader from "../components/bloodbankheader";
+import { useState } from "react";
 
-// Blood item type
-type BloodInventoryItem = {
-  id: number;
-  type: string;
-  units: number;
-  collectedAt: string;
-  expiresAt: string;
-};
+// --- Hospitals data ---
+const hospitals = [
+  {
+    name: "Manila General Hospital",
+    address: "123 Health St, Manila",
+    city: "Manila",
+    stocks: {
+      "O+": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Critical" },
+      "O-": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Critical", "Whole Blood": "Available" },
+      "A+": { "Red Blood Cells": "Available", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "A-": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "B+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Available", "Whole Blood": "Critical" },
+      "B-": { "Red Blood Cells": "Critical", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Available" },
+      "AB+": { "Red Blood Cells": "Critical", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Available" },
+      "AB-": { "Red Blood Cells": "Available", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Critical" },
+    },
+  },
+  {
+    name: "St. Luke's Medical Center",
+    address: "456 Wellness Ave, Manila",
+    city: "Manila",
+    stocks: {
+      "O+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "O-": { "Red Blood Cells": "Available", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "A+": { "Red Blood Cells": "Available", Plasma: "Available", Platelets: "Critical", "Whole Blood": "Available" },
+      "A-": { "Red Blood Cells": "Critical", Plasma: "Available", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "B+": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Critical" },
+      "B-": { "Red Blood Cells": "Low Stock", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Available" },
+      "AB+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "AB-": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Critical", "Whole Blood": "Available" },
+    },
+  },
+  {
+    name: "Makati Medical Center",
+    address: "789 Care Blvd, Makati",
+    city: "Makati",
+    stocks: {
+      "O+": { "Red Blood Cells": "Critical", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "O-": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Critical", "Whole Blood": "Available" },
+      "A+": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Available", "Whole Blood": "Critical" },
+      "A-": { "Red Blood Cells": "Available", Plasma: "Critical", Platelets: "Available", "Whole Blood": "Low Stock" },
+      "B+": { "Red Blood Cells": "Available", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+      "B-": { "Red Blood Cells": "Low Stock", Plasma: "Available", Platelets: "Available", "Whole Blood": "Critical" },
+      "AB+": { "Red Blood Cells": "Available", Plasma: "Low Stock", Platelets: "Available", "Whole Blood": "Critical" },
+      "AB-": { "Red Blood Cells": "Critical", Plasma: "Available", Platelets: "Low Stock", "Whole Blood": "Available" },
+    },
+  },
+];
 
-// All blood types
-const allBloodTypes = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
+const bloodTypes = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
+const components = ["Red Blood Cells", "Plasma", "Platelets", "Whole Blood"];
 
-// Format date (MM-DD-YYYY)
-function formatDate(dateStr: string) {
-  if (!dateStr) return "";
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "";
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${month}-${day}-${year}`;
-}
-
-// Expiry color + status
-function getExpiryColor(expiry: string) {
-  if (!expiry) return "text-gray-400";
-  const today = new Date();
-  const expDate = new Date(expiry);
-  const diffDays = Math.ceil(
-    (expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  if (diffDays < 0) return "text-red-500 font-bold";
-  if (diffDays <= 7) return "text-orange-500 font-bold";
-  return "text-green-500 font-bold";
+function getStatusColor(status: string) {
+  if (status === "Available") return "bg-green-100 text-green-700";
+  if (status === "Low Stock") return "bg-yellow-100 text-yellow-700";
+  if (status === "Critical") return "bg-red-100 text-red-700";
+  return "bg-gray-100 text-gray-700";
 }
 
 export default function HospitalInventory() {
-  const [inventory, setInventory] = useState<BloodInventoryItem[]>([]);
-  const [activeSheet, setActiveSheet] = useState("O+");
+  const [city, setCity] = useState("");
+  const [bloodType, setBloodType] = useState("A+");
+  const [component, setComponent] = useState("Red Blood Cells");
 
-  // Load from localStorage (or later backend)
-  useEffect(() => {
-    const saved = localStorage.getItem("bloodInventory");
-    if (saved) setInventory(JSON.parse(saved));
-  }, []);
-
-  // Filter and sort items for active sheet
-  const filteredItems = inventory
-    .filter((item) => item.type === activeSheet)
-    .sort(
-      (a, b) =>
-        new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime()
-    );
+  // Filter hospitals dynamically
+  const filteredHospitals = hospitals.filter(
+    (h) =>
+      (!city || h.city.toLowerCase().includes(city.toLowerCase())) &&
+      h.stocks[bloodType] &&
+      h.stocks[bloodType][component]
+  );
 
   return (
     <div className="flex">
@@ -65,70 +83,99 @@ export default function HospitalInventory() {
         <BloodbankHeader />
         <main className="pt-20 p-8 min-h-screen bg-gray-100 text-black">
           <h1 className="text-3xl font-bold text-red-600 mb-8">
-            Hospital Blood Inventory
+            Blood Availability
           </h1>
 
-          {/* Card wrapper */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
-            {/* Blood Type Buttons */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              {allBloodTypes.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setActiveSheet(type)}
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    activeSheet === type
-                      ? "bg-red-600 text-white"
-                      : "bg-gray-700 text-white hover:bg-gray-600"
-                  }`}
-                >
-                  {type} Sheet
-                </button>
-              ))}
-            </div>
-
-            {/* Table Title */}
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              {activeSheet} Inventory
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Check Blood Availability
             </h2>
 
-            {/* Table or Message */}
-            {filteredItems.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 font-medium">
-                🚨 No blood units available for{" "}
-                <span className="font-bold">{activeSheet}</span>.
+            {/* Search Inputs */}
+            <div className="flex flex-wrap gap-4 mb-4">
+              <div className="flex flex-col flex-1 min-w-[180px]">
+                <label className="text-sm font-semibold mb-1">
+                  Location (City)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Manila"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="border rounded-lg px-3 py-2 text-gray-700"
+                />
               </div>
-            ) : (
-              <table className="w-full text-sm min-w-[600px]">
-                <thead>
-                  <tr className="text-gray-500 border-b border-gray-300">
-                    <th className="text-left p-3">Blood Type</th>
-                    <th className="text-left p-3">Units</th>
-                    <th className="text-left p-3">Collected At</th>
-                    <th className="text-left p-3">Expiry Date</th>
-                    <th className="text-left p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItems.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-200">
-                      <td className="p-3">{item.type}</td>
-                      <td className="p-3">{item.units}</td>
-                      <td className="p-3">{formatDate(item.collectedAt)}</td>
-                      <td className="p-3">{formatDate(item.expiresAt)}</td>
-                      <td className={`p-3 ${getExpiryColor(item.expiresAt)}`}>
-                        {new Date(item.expiresAt) < new Date()
-                          ? "Expired"
-                          : new Date(item.expiresAt).getTime() - Date.now() <=
-                            7 * 24 * 60 * 60 * 1000
-                          ? "Expiring Soon"
-                          : "OK"}
-                      </td>
-                    </tr>
+              <div className="flex flex-col min-w-[120px]">
+                <label className="text-sm font-semibold mb-1">Blood Type</label>
+                <select
+                  value={bloodType}
+                  onChange={(e) => setBloodType(e.target.value)}
+                  className="border rounded-lg px-3 py-2 text-gray-700"
+                >
+                  {bloodTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
                   ))}
-                </tbody>
-              </table>
-            )}
+                </select>
+              </div>
+              <div className="flex flex-col min-w-[160px]">
+                <label className="text-sm font-semibold mb-1">Component</label>
+                <select
+                  value={component}
+                  onChange={(e) => setComponent(e.target.value)}
+                  className="border rounded-lg px-3 py-2 text-gray-700"
+                >
+                  {components.map((comp) => (
+                    <option key={comp} value={comp}>
+                      {comp}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Results */}
+            <div>
+              <div className="mb-3 text-base font-semibold text-gray-700">
+                Showing results for{" "}
+                <span className="text-red-600">{bloodType}</span> (
+                <span className="text-red-600">{component}</span>)
+                {city && (
+                  <>
+                    {" "}in <span className="text-red-600">{city}</span>
+                  </>
+                )}
+                :
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {filteredHospitals.length === 0 ? (
+                  <div className="text-gray-500">
+                    No hospitals found for this selection.
+                  </div>
+                ) : (
+                  filteredHospitals.map((h, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white rounded-xl shadow border px-5 py-4 flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="font-bold text-lg">{h.name}</div>
+                        <div className="text-gray-500 text-sm">{h.address}</div>
+                      </div>
+                      <span
+                        className={`px-4 py-1 rounded-full text-sm font-semibold ${getStatusColor(
+                          h.stocks[bloodType][component]
+                        )}`}
+                      >
+                        {h.stocks[bloodType][component]}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </main>
       </div>

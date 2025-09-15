@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // ✅ import router
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../supabaseClient";
 
 interface LoginModalProps {
   onClose: () => void;
@@ -11,63 +12,82 @@ interface LoginModalProps {
 
 export default function LoginModal({ onClose, onLogin, onSwitchToSignup }: LoginModalProps) {
   const [form, setForm] = useState({ email: "", password: "" });
-  const router = useRouter(); // ✅ initialize router
-
-  useEffect(() => {
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-    if (!users.some((u: any) => u.email === "redcross@example.com")) {
-      users.push({
-        name: "Red Cross Manila",
-        email: "redcross@example.com",
-        password: "password123",
-        role: "bloodbank",
-      });
-    }
-
-    if (!users.some((u: any) => u.email === "hospital@example.com")) {
-      users.push({
-        name: "St. Peter Hospital",
-        email: "hospital@example.com",
-        password: "password123",
-        role: "hospital",
-      });
-    }
-
-    localStorage.setItem("users", JSON.stringify(users));
-  }, []);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find(
-      (u: any) => u.email === form.email && u.password === form.password
-    );
+    try {
+      // 1️⃣ Sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
 
-    if (!user) {
-      alert("Invalid email or password");
-      return;
+      if (authError || !authData.user) {
+        alert("Invalid email or password");
+        setLoading(false);
+        return;
+      }
+
+      const user = authData.user;
+
+      // 2️⃣ Check if profile exists
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError && profileError.code !== "PGRST116") {
+        // Ignore "no rows found" (PGRST116), but log other errors
+        console.error("Profile fetch error:", profileError);
+      }
+
+      // 3️⃣ Insert profile if it doesn't exist
+      if (!profileData) {
+        await supabase.from("profiles").insert({
+          id: user.id,
+          full_name: "New User",
+          age: null,
+          gender: null,
+          contact: null,
+          address: null,
+          blood_type: null,
+        });
+      }
+
+      // 4️⃣ Save current user in localStorage (optional)
+      localStorage.setItem("currentUser", JSON.stringify(user));
+
+      // 5️⃣ Trigger parent onLogin
+      onLogin(user);
+      onClose();
+
+      // 6️⃣ Redirect based on user role
+      // Assuming roles are stored in `user.user_metadata.role` or a custom table
+      const role = (user.user_metadata as any)?.role || "donor"; // default to donor
+      if (role === "donor") router.push("/donor");
+      if (role === "bloodbank") router.push("/bloodbank/bloodbank_dashboard");
+      if (role === "hospital") router.push("/hospital/hospital_dashboard");
+
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("An unexpected error occurred during login.");
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem("currentUser", JSON.stringify(user));
-    onLogin(user);
-    onClose();
-
-    // ✅ Navigate with Next.js router instead of window.location.href
-    if (user.role === "donor") router.push("/donor");
-    if (user.role === "bloodbank") router.push("/bloodbank/bloodbank_dashboard");
-    if (user.role === "hospital") router.push("/hospital/hospital_dashboard");
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
       <div className="relative bg-white rounded-xl shadow-xl p-8 w-full max-w-md">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl"
@@ -102,13 +122,13 @@ export default function LoginModal({ onClose, onLogin, onSwitchToSignup }: Login
 
           <button
             type="submit"
-            className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700"
+            disabled={loading}
+            className={`w-full py-2 rounded-lg text-white ${loading ? "bg-gray-400" : "bg-red-600 hover:bg-red-700"}`}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* Switch to Sign Up */}
         <p className="mt-4 text-center text-sm text-gray-600">
           Don’t have an account?{" "}
           <button

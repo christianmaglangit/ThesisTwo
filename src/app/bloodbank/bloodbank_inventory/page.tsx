@@ -23,7 +23,7 @@ type BloodInventoryItem = {
 };
 
 const allBloodTypes = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
-const bloodComponents = ["Whole Blood", "Plasma", "Platelets", "Red Blood Cells"];
+const bloodComponents = ["All Components", "Red Blood Cells", "Plasma", "Platelets", "Whole Blood"];
 
 // Helpers
 function formatDateTime(dateStr: string) {
@@ -60,39 +60,31 @@ function getExpiryColor(expiry: string) {
   return "text-green-400 font-bold";
 }
 
-// ✅ Sorting helper
 function sortByExpiry(a: BloodInventoryItem, b: BloodInventoryItem) {
-  const today = new Date();
-  const expA = new Date(a.expiresAt).getTime();
-  const expB = new Date(b.expiresAt).getTime();
-  const diffA = expA - today.getTime();
-  const diffB = expB - today.getTime();
-  if (diffA < 0 && diffB >= 0) return -1;
-  if (diffB < 0 && diffA >= 0) return 1;
-  if (diffA < 0 && diffB < 0) return expA - expB;
-  if (diffA <= 7 * 24 * 60 * 60 * 1000 && diffB > 7 * 24 * 60 * 60 * 1000) return -1;
-  if (diffB <= 7 * 24 * 60 * 60 * 1000 && diffA > 7 * 24 * 60 * 60 * 1000) return 1;
-  return expA - expB;
+  return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
 }
 
-// 🔹 Generate Example Data (5 items each type)
+// 🔹 Generate Example Data
 function generateMockInventory(): BloodInventoryItem[] {
   const items: BloodInventoryItem[] = [];
   const now = new Date();
+  const comps = ["Red Blood Cells", "Plasma", "Platelets", "Whole Blood"];
 
   allBloodTypes.forEach((type, tIndex) => {
-    for (let i = 0; i < 5; i++) {
-      const collectedAt = new Date(now.getTime() - i * 24 * 60 * 60 * 1000); // collected past i days
-      const expiresAt = new Date(collectedAt.getTime() + (20 + i * 2) * 24 * 60 * 60 * 1000); // expires in ~20+ days
-      items.push({
-        id: Date.now() + tIndex * 10 + i,
-        type,
-        component: bloodComponents[i % bloodComponents.length],
-        units: 1 + (i % 5),
-        collectedAt: collectedAt.toISOString(),
-        expiresAt: expiresAt.toISOString(),
-      });
-    }
+    comps.forEach((comp, cIndex) => {
+      for (let i = 0; i < 3; i++) {
+        const collectedAt = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        const expiresAt = new Date(collectedAt.getTime() + (20 + i * 2) * 24 * 60 * 60 * 1000);
+        items.push({
+          id: Date.now() + tIndex * 100 + cIndex * 10 + i,
+          type,
+          component: comp,
+          units: 1 + (i % 5),
+          collectedAt: collectedAt.toISOString(),
+          expiresAt: expiresAt.toISOString(),
+        });
+      }
+    });
   });
 
   return items;
@@ -101,7 +93,7 @@ function generateMockInventory(): BloodInventoryItem[] {
 export default function BloodBankInventory() {
   const [inventory, setInventory] = useState<BloodInventoryItem[]>([]);
   const [activeSheet, setActiveSheet] = useState("O+");
-  const [component, setComponent] = useState("Whole Blood");
+  const [component, setComponent] = useState("All Components");
   const [amount, setAmount] = useState<number>(0);
   const [collectedAt, setCollectedAt] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
@@ -129,6 +121,9 @@ export default function BloodBankInventory() {
     const now = new Date();
     const defaultCollected = now.toISOString();
     const defaultExpiry = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const targetComponent = component === "All Components" ? "Red Blood Cells" : component;
+
     if (editId) {
       setInventory((prev) =>
         prev.map((item) =>
@@ -136,7 +131,7 @@ export default function BloodBankInventory() {
             ? {
                 ...item,
                 units: amount,
-                component,
+                component: targetComponent,
                 collectedAt: collectedAt || defaultCollected,
                 expiresAt: expiresAt || defaultExpiry,
               }
@@ -148,7 +143,7 @@ export default function BloodBankInventory() {
       const newEntry: BloodInventoryItem = {
         id: Date.now(),
         type: activeSheet,
-        component,
+        component: targetComponent,
         units: amount,
         collectedAt: collectedAt || defaultCollected,
         expiresAt: expiresAt || defaultExpiry,
@@ -183,24 +178,38 @@ export default function BloodBankInventory() {
         <main className="pt-20 p-8 min-h-screen bg-gray-200 text-black">
           <h1 className="text-3xl font-bold text-red-500 mb-8">Manage Blood Inventory</h1>
 
-          {/* Inventory Table */}
           <Card className="mb-8 overflow-x-auto">
-            <div className="flex flex-wrap gap-3 mb-6 text-white">
-              {allBloodTypes.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setActiveSheet(type)}
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    activeSheet === type ? "bg-red-600 text-white" : "bg-gray-700 hover:bg-gray-600"
-                  }`}
-                >
-                  {type} Sheet
-                </button>
-              ))}
+            {/* Filters */}
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+              <div className="flex flex-wrap gap-3">
+                {allBloodTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setActiveSheet(type)}
+                    className={`px-4 py-2 rounded-lg font-semibold ${
+                      activeSheet === type ? "bg-red-600 text-white" : "bg-gray-700 hover:bg-gray-600 text-white"
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+
+              <select
+                value={component}
+                onChange={(e) => setComponent(e.target.value)}
+                className="bg-white text-black px-4 py-2 border rounded-lg"
+              >
+                {bloodComponents.map((comp) => (
+                  <option key={comp} value={comp}>
+                    {comp}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              {activeSheet} Inventory
+              {activeSheet} - {component}
             </h2>
 
             <table className="w-full text-sm min-w-[700px]">
@@ -217,7 +226,11 @@ export default function BloodBankInventory() {
               </thead>
               <tbody>
                 {inventory
-                  .filter((item) => item.type === activeSheet)
+                  .filter(
+                    (item) =>
+                      item.type === activeSheet &&
+                      (component === "All Components" || item.component === component)
+                  )
                   .sort(sortByExpiry)
                   .map((item) => (
                     <tr key={item.id} className="border-b border-gray-700">
@@ -260,12 +273,12 @@ export default function BloodBankInventory() {
                   setAmount(0);
                   setCollectedAt("");
                   setExpiresAt("");
-                  setComponent("Whole Blood");
+                  setComponent("Red Blood Cells");
                   setShowModal(true);
                 }}
                 className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 text-white"
               >
-                ➕ Add {activeSheet} Stock
+                ➕ Add {activeSheet} {component === "All Components" ? "" : component}
               </button>
             </div>
           </Card>
@@ -275,7 +288,7 @@ export default function BloodBankInventory() {
             <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-opacity-60 z-50">
               <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg">
                 <h2 className="text-xl font-semibold mb-4 text-black">
-                  {editId ? "Edit" : "Add"} {activeSheet} Stock
+                  {editId ? "Edit" : "Add"} {activeSheet} {component}
                 </h2>
                 <div className="flex flex-col gap-4">
                   <select
@@ -283,11 +296,13 @@ export default function BloodBankInventory() {
                     onChange={(e) => setComponent(e.target.value)}
                     className="bg-gray-200 text-black p-2 rounded-lg w-full"
                   >
-                    {bloodComponents.map((comp) => (
-                      <option key={comp} value={comp}>
-                        {comp}
-                      </option>
-                    ))}
+                    {bloodComponents
+                      .filter((comp) => comp !== "All Components")
+                      .map((comp) => (
+                        <option key={comp} value={comp}>
+                          {comp}
+                        </option>
+                      ))}
                   </select>
 
                   <input

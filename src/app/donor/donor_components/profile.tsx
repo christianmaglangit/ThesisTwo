@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect, useRef } from "react";
 
 interface ProfileModalProps {
@@ -6,12 +7,24 @@ interface ProfileModalProps {
   onClose: () => void;
 }
 
+interface Profile {
+  name: string;
+  age: string;
+  gender: string;
+  cellphone: string;
+  address: string;
+  bloodType: string;
+  email: string;
+  password: string;
+  image: string | null;
+}
+
 const bloodTypes = ["", "O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
 const genders = ["", "Male", "Female", "Other"];
 
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<Profile>({
     name: "",
     age: "",
     gender: "",
@@ -20,12 +33,12 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     bloodType: "",
     email: "",
     password: "",
-    image: null as string | null,
+    image: null,
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load saved profile
+  // Load saved profile from localStorage
   useEffect(() => {
     setProfile({
       name: localStorage.getItem("profile_name") || "",
@@ -40,22 +53,22 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     });
   }, []);
 
-  // Handle input change
-  const handleChange = (field: string, value: string) => {
+  // Handle input changes
+  const handleChange = (field: keyof Profile, value: string) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Save profile
+  // Save profile to localStorage
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     Object.entries(profile).forEach(([key, value]) => {
       if (value) localStorage.setItem(`profile_${key}`, value.toString());
     });
-    setIsEditing(false); // Exit edit mode but keep modal open
+    setIsEditing(false); // Exit edit mode
     alert("✅ Profile saved successfully!");
   };
 
-  // Image upload
+  // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
